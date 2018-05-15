@@ -793,3 +793,62 @@ function getCellValues( data, rowIndex, sortArray ) {
 
   return values;
 }
+
+/**
+ * [getSortArray description]
+ * @param  {[type]} filename  [description]
+ * @param  {[type]} colObject Each key represents a column header. Each value
+ * should be either 'asc' or 'desc' indicating sort direction.
+ * @return {array}           [description]
+ */
+function getSortArray( filename, colObject ) {
+
+    var sortArray = [];
+    var headers = getHeaders( filename );
+
+    // file was not found or valid
+    if ( headers.length === 0 ) {
+        return sortArray;
+    }
+
+    for ( var header in colObject ) {
+        if ( isNullOrEmptySpace( header ) === true ) {
+            continue;
+        }
+
+        var colIndex = getColumnIndex( headers, header );
+        var order = getValidOrder( colObject[ header ] );
+
+        if ( colIndex === -1 ) {
+            log( 'getSortArray(); index for header "' + header + '" could ' +
+            'not be found for file "' + filename + '"' );
+            continue;
+        }
+
+        // add this object to the array of columns that will be used to sort
+        // the specified file
+        var sortObject = {};
+        sortObject.column = colIndex;
+        sortObject[ order ] = true;
+        sortArray.push( sortObject );
+    }
+
+    return sortArray;
+}
+
+/**
+ * Returns a valid sort order for the sort array, which is used when retrieving
+ * data from a Google Sheet.
+ * @param  {string} direction Either 'ascending' or 'descending'.
+ * @return {string}
+ */
+function getValidOrder( direction ) {
+
+    direction = ( direction + '' ).toLowerCase().trim();
+
+    if ( direction === 'descending' || direction === 'desc' ) {
+        return 'descending';
+    }
+
+    return 'ascending';
+}

@@ -155,7 +155,14 @@ function getPaymentMethodsHeaders() {
    return getDonationTypesHeaders();
 }
 
-
+/**
+ * Each file has column headers. This function returns the array of column
+ * headers for each file type. The headers themselves follow a few conventions:
+ * Every header ending in '_ID' is a number representing a row ID. Every header
+ * ending in '_AT' is a date/time. All dates are handled the same.
+ * @param  {[type]} name [description]
+ * @return {[type]}      [description]
+ */
 function getHeaders( name ) {
   if ( isNullOrEmptySpace( name ) === true ) {
      return [];

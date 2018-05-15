@@ -76,9 +76,9 @@ Number.isInteger = Number.isInteger || function( value ) {
 * . https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/endsWith
 * . @return boolean
 */
-String.prototype.endsWith = String.prototype.endsWith || function( search, this_len ) {
-		if ( this_len === undefined || this_len > this.length ) {
-			this_len = this.length;
+String.prototype.endsWith = String.prototype.endsWith || function( search, thisLen ) {
+		if ( thisLen === undefined || thisLen > this.length ) {
+			thisLen = this.length;
 		}
-		return this.substring( this_len - search.length, this_len ) === search;
+		return this.substring( thisLen - search.length, thisLen ) === search;
 };
