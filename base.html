@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+
+    <!-- include the CSS for Twitter Bootstrap 3.3.7 if enabled -->
+    <? if (data.useBootstrap) { ?>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+    integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    
+    <!-- bootstrap-datepicker -->
+    <!-- https://github.com/uxsolutions/bootstrap-datepicker -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/css/bootstrap-datepicker.standalone.min.css" />
+    <? } else { ?>
+    <!-- google apps css -->
+    <!-- https://developers.google.com/apps-script/add-ons/css -->
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css" />
+    <? } ?>
+    
+    <!-- font awesome -->
+    <script defer src="https://use.fontawesome.com/releases/v5.0.7/js/all.js"></script>
+
+    <!-- custom css -->
+    <?!= include(data.css); ?>
+  </head>
+  <body>
+  
+  <!-- prints the HTML content -->
+  <?!= include(data.content); ?>
+  
+  <!-- jQuery 3.3.7 -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  
+  <!-- include the JS for Twitter Bootstrap 3.3.7 if enabled -->
+  <? if (data.useBootstrap) { ?>
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js"></script>
+
+  <? } ?>
+
+  <!-- prints javascript -->
+  <!-- moment.js CDN -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.21.0/moment.min.js"></script>
+  
+  <!-- javascript common to all pages -->
+  <?!= include('common.js'); ?>
+  
+  <!-- page specific javascript -->
+  <?!= include(data.js); ?>
+    
+  </body>
+</html>
