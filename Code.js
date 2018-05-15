@@ -51,15 +51,15 @@ function onOpen(e) {
       menu.addItem('Start workflow', 'manageDonors');
     }
   menu.addToUi();
-  
+
   var ui = SpreadsheetApp.getUi();
   // Or DocumentApp or FormApp.
-  
+
   // shows one way that a custom menu can be added
   ui.createMenu('Donation Tracker')
       .addItem('Manage members...', 'manageDonors')
       .addToUi();
-  
+
     // shows a second way that a custom menu can be added
     var spreadsheet = SpreadsheetApp.getActive();
     var menuItems = [
@@ -89,7 +89,7 @@ function onInstall(e) {
 function isNullOrEmpty( x ) {
     return x === undefined || x === '' || x === null;
 }
-  
+
 /**
 * Returns true if the specified variable is null, empty, or with all spaces
 * removed an empty string.
@@ -101,7 +101,7 @@ function isNullOrEmptySpace( x ) {
 function manageDonors() {
    // type HtmlOutput
    var html = extends('base', 'donors', 'customcss', 'donors.js');
-  
+
    // Ui
    SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
    // showModalDialog(HtmlOutput, String)
@@ -111,7 +111,7 @@ function manageDonors() {
 function manageDonations() {
   // HtmlOutput
   var html = extends('base', 'donations', 'customcss', 'donations.js');
-  
+
   // Ui
    SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
    // showModalDialog(HtmlOutput, String)
@@ -121,7 +121,7 @@ function manageDonations() {
 function manageDonationTypes() {
   // HtmlOutput
   var html = extends('base', 'donation-types', 'customcss', 'donation-types.js');
- 
+
   // Ui
    SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
    // showModalDialog(HtmlOutput, String)
@@ -131,7 +131,7 @@ function manageDonationTypes() {
 function managePaymentMethods() {
   // HtmlOutput
   var html = extends('base', 'payment-methods', 'customcss', 'payment-methods.js');
- 
+
   // Ui
    SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
    // showModalDialog(HtmlOutput, String)
@@ -163,10 +163,10 @@ function include(filename) {
 * . @return HtmlOutput
 */
 function extends(layoutFileName, contentFileName, cssFileName, jsFileName, bootstrap) {
-  // https://developers.google.com/apps-script/reference/html/html-service#createTemplateFromFile(String) 
+  // https://developers.google.com/apps-script/reference/html/html-service#createTemplateFromFile(String)
   // returns HtmlTemplate
   var template = HtmlService.createTemplateFromFile(layoutFileName);
-  
+
   // https://developers.google.com/apps-script/reference/html/html-template#evaluate()
   // Key sentence from the docs:
   // Any properties (like .data) set on this HtmlTemplate object will be in scope when evaluating.
@@ -195,7 +195,7 @@ function log(text, error) {
   Logger.log(text);
   console.log(text);
   if (error === true) {
-     SpreadsheetApp.getUi().alert(text); 
+     SpreadsheetApp.getUi().alert(text);
   }
   return error === true;
 }
@@ -210,4 +210,3 @@ function titleCase(str) {
     return (word.charAt(0).toUpperCase() + word.slice(1));
   }).join(' ');
 }
-

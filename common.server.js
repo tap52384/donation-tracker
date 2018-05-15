@@ -10,15 +10,15 @@
 function getObject( filename, rowId ) {
 
   var data = getAllData( filename );
-  
+
   // empty case: no row ID specified
   if ( isNullOrEmptySpace( rowId ) === true ||
      data === null ) {
     log( 'getObject(); no object was returned. rowId: ' + rowId +
         ' data is null? ' + ( data === null ? 'true' : 'false' ) );
-     return {}; 
+     return {};
   }
-  
+
   var rowCount = data.getNumRows();
   var headers = getHeaders( filename );
   var idColIndex = getColumnIndex( headers, 'id' );
@@ -44,9 +44,9 @@ function getObject( filename, rowId ) {
         var header = headers[ key ];
         var colIndex = getColumnIndex( headers, header );
         var value = data.getCell( row, colIndex ).getValue();
-      
-      log('getObject(); current header: ' + header);
-      
+
+      log( 'getObject(); current header: ' + header );
+
         // dates cannot be returned with success handlers for some reason
         // was able to confirm that Date objects are not handled properly.
         // this is mitigated by converting all Date objects to a string, yuck
@@ -55,11 +55,12 @@ function getObject( filename, rowId ) {
         // https://developers.google.com/apps-script/reference/utilities/utilities#formatdatedate-timezone-format
       if ( isDateColumn( header ) === true && typeof value === typeof new Date() ) {
          log( 'getObject(); ' + header + ' is a Date object ' + value + '; converting to string...' );
+
          // https://developers.google.com/apps-script/reference/utilities/utilities#formatdatedate-timezone-format
-         value = Utilities.formatDate(value, "GMT", "yyyy-MM-dd"); // "yyyy-MM-dd mm:hh:ss a"
+         value = Utilities.formatDate( value, 'GMT', 'yyyy-MM-dd' ); // "yyyy-MM-dd mm:hh:ss a"
         log( 'getObject(); formatDate value: ' + value );
       }
-      
+
         // save the value in the object
         object[ header ] = value;
         log( header + ': ' + object[ header ] );
@@ -74,8 +75,8 @@ function getObject( filename, rowId ) {
   return object;
 }
 
-function isDateColumn(header) {
-   return isNullOrEmptySpace( header ) === false && header.endsWith( '_AT' ) === true; 
+function isDateColumn( header ) {
+   return isNullOrEmptySpace( header ) === false && header.endsWith( '_AT' ) === true;
 }
 
 /**
@@ -111,7 +112,7 @@ function getObject2( filename, rowId ) {
 }
 
 function getActualDataRange( filename ) {
-   var spreadsheet = getFileByFilename(filename);
+   var spreadsheet = getFileByFilename( filename );
 
   if ( spreadsheet === null ) {
      log( 'getActualDataRange(); the spreadsheet ' + filename + ' was not found or loaded...' );
@@ -135,9 +136,9 @@ function getAllData( filename ) {
 
   // get the data range for the specified spreadsheet
   var data = getActualDataRange( filename );
-  
-  if ( data === null) {
-     return null; 
+
+  if ( data === null ) {
+     return null;
   }
 
   // var rowCount = data.getNumRows();
@@ -160,10 +161,10 @@ function getAllData( filename ) {
 * . @return Spreadsheet|null
 */
 function getFileByFilename( filename ) {
-  
-    filename = (filename + '').toLowerCase();
-  
-    return getFile(filename);
+
+    filename = ( filename + '' ).toLowerCase();
+
+    return getFile( filename );
 }
 
 function getFile( propertyName ) {
@@ -183,7 +184,7 @@ function getFile( propertyName ) {
   var appFolder = getDataFolder();
 
   if ( appFolder === null ) {
-     Logger.log( "getFile(); the app folder does not exist and could not be created." );
+     Logger.log( 'getFile(); the app folder does not exist and could not be created.' );
      return null;
   }
 
@@ -192,11 +193,11 @@ function getFile( propertyName ) {
   var files = appFolder.getFilesByName( name );
 
   if ( files.hasNext() === false ) {
-     Logger.log( "getFile(); the '" + name + "' file does not exist. will attempt creation." );
+     Logger.log( 'getFile(); the \'' + name + '\' file does not exist. will attempt creation.' );
      var spreadsheet = createFile( appFolder, name );
      var headers = getHeaders( name );
-    
-     Logger.log( "getFile(); the '" + name + "' file has been created. initializing..." );
+
+     Logger.log( 'getFile(); the \'' + name + '\' file has been created. initializing...' );
      return initializeFile( spreadsheet, headers );
   }
 
@@ -209,22 +210,23 @@ function getFile( propertyName ) {
 * . It's blank and needs headers added to it.
 * . @return Spreadsheet
 */
-function createFile(folder, filename) {
+function createFile( folder, filename ) {
+
   // do I create it and then move it to the folder? that seems
   // to be the way I may have to go.
   // returns Spreadsheet
-  var spreadsheet = SpreadsheetApp.create(filename);
+  var spreadsheet = SpreadsheetApp.create( filename );
 
   // use the ID of the spreadsheet in order to move it to the
   // app folder
   var fileId = spreadsheet.getId();
-  var file = DriveApp.getFileById(fileId);
+  var file = DriveApp.getFileById( fileId );
 
   // change the parent folder of the file (apparently a file can
   // have multiple parents) by adding the file to the app
   // folder and removing it from root
-  folder.addFile(file);
-  DriveApp.getRootFolder().removeFile(file);
+  folder.addFile( file );
+  DriveApp.getRootFolder().removeFile( file );
 
   return spreadsheet;
 }
@@ -234,12 +236,12 @@ function createFile(folder, filename) {
 * . @param  string filename
 * . @return Sheet
 */
-function getSheetFromSpreadsheet(filename) {
-   var spreadsheet = getFileByFilename(filename);
+function getSheetFromSpreadsheet( filename ) {
+   var spreadsheet = getFileByFilename( filename );
 
    return spreadsheet === null ?
      null :
-     spreadsheet.getSheets()[0];
+     spreadsheet.getSheets()[ 0 ];
 }
 
 /**
@@ -249,68 +251,70 @@ function getSheetFromSpreadsheet(filename) {
 * . @param  string columnLetter
 * . @return boolean
 */
-function setColDateTimeFmt(sheet, header, columnLetter) {
+function setColDateTimeFmt( sheet, header, columnLetter ) {
 
   // makes sure the header ends with _AT (used for all date columns)
-  if (isNullOrEmptySpace(header) === true ||
-     header.endsWith('_AT') === false ||
-     isNullOrEmptySpace(columnLetter) === true) {
+  if ( isNullOrEmptySpace( header ) === true ||
+     header.endsWith( '_AT' ) === false ||
+     isNullOrEmptySpace( columnLetter ) === true ) {
      return false;
   }
 
   // with the columnLetter, we can get the correct range to format correctly
-  var entireColumn = sheet.getRange(columnLetter + ':' + columnLetter).offset(1, 0);
+  var entireColumn = sheet.getRange( columnLetter + ':' + columnLetter ).offset( 1, 0 );
 
   // set the format for this range which should cover all future entries
   // https://developers.google.com/apps-script/reference/spreadsheet/range#setNumberFormat(String)
   // https://developers.google.com/sheets/api/guides/formats
-  entireColumn.setNumberFormat("mm/dd/yyyy hh:mm:ss AM/PM");
-  
+  entireColumn.setNumberFormat( 'mm/dd/yyyy hh:mm:ss AM/PM' );
+
   // create a data validation rule for this range
   // https://developers.google.com/apps-script/reference/spreadsheet/range#setDataValidation(DataValidation)
   // https://developers.google.com/apps-script/reference/spreadsheet/data-validation-builder#requireDate()
   var rule = SpreadsheetApp.newDataValidation().requireDate()
-  .setAllowInvalid(false)
-  .setHelpText('Must be a valid date/time')
+  .setAllowInvalid( false )
+  .setHelpText( 'Must be a valid date/time' )
   .build();
-  entireColumn.setDataValidation(rule);
+  entireColumn.setDataValidation( rule );
 
   return true;
 }
 
-function setIdFmt(sheet, header, columnLetter) {
+function setIdFmt( sheet, header, columnLetter ) {
+
   // makes sure the header ends with _AT (used for all date columns)
-  if (isNullOrEmptySpace(header) === true ||
-     (header.endsWith('_ID') === false && header !== 'ID') ||
-     isNullOrEmptySpace(columnLetter) === true) {
+  if ( isNullOrEmptySpace( header ) === true ||
+     ( header.endsWith( '_ID' ) === false && header !== 'ID' ) ||
+     isNullOrEmptySpace( columnLetter ) === true ) {
      return false;
   }
 
   // with the columnLetter, we can get the correct range to format correctly
-  var entireColumn = sheet.getRange(columnLetter + ':' + columnLetter).offset(1, 0);
+  var entireColumn = sheet.getRange( columnLetter + ':' + columnLetter ).offset( 1, 0 );
 
   // set the format for this range which should cover all future entries
   // https://developers.google.com/apps-script/reference/spreadsheet/range#setNumberFormat(String)
   // https://developers.google.com/sheets/api/guides/formats
-  entireColumn.setNumberFormat("#######0");
-  
+  entireColumn.setNumberFormat( '#######0' );
+
   // for all _ID column, make sure the value is a number greater than 0
   var standardRule = SpreadsheetApp.newDataValidation()
-  .requireNumberGreaterThanOrEqualTo(0)
-  .setHelpText('Must be a number greater than 0')
-  .setAllowInvalid(false)
+  .requireNumberGreaterThanOrEqualTo( 0 )
+  .setHelpText( 'Must be a number greater than 0' )
+  .setAllowInvalid( false )
   .build();
-  
-  if (header !== 'ID') {
-     entireColumn.setDataValidation(standardRule);
+
+  if ( header !== 'ID' ) {
+     entireColumn.setDataValidation( standardRule );
      return true;
   }
-  
+
   // for the main ID column, make sure the value is a number
   // AND make sure no values repeat
   // https://webapps.stackexchange.com/a/85849
   // https://support.google.com/docs/answer/3256550
   var criteria = SpreadsheetApp.DataValidationCriteria.CUSTOM_FORMULA;
+
   // ISNUMBER
   // https://support.google.com/docs/answer/3093296?hl=en
   // AND
@@ -321,39 +325,40 @@ function setIdFmt(sheet, header, columnLetter) {
   var formula = '=COUNTIF($' + columnLetter + ':$' + columnLetter + ',"="&' + columnLetter + '1) + ' +
     'COUNTIF($' + columnLetter + ':$' + columnLetter + ',"<=0") < 2';
   var args = [ formula ];
-  
+
   var combinedRule = SpreadsheetApp.newDataValidation()
   .requireFormulaSatisfied( formula )
-  .setHelpText('ID must be a unique number greater than 0')
-  .setAllowInvalid(false)
+  .setHelpText( 'ID must be a unique number greater than 0' )
+  .setAllowInvalid( false )
   .build();
-  
-  entireColumn.setDataValidation(combinedRule);
+
+  entireColumn.setDataValidation( combinedRule );
   return true;
 }
 
-function setCurrencyFmt(sheet, header, columnLetter) {
+function setCurrencyFmt( sheet, header, columnLetter ) {
+
   // makes sure the header ends with _AT (used for all date columns)
-  if (isNullOrEmptySpace(header) === true ||
+  if ( isNullOrEmptySpace( header ) === true ||
      header !== 'AMOUNT' ||
-     isNullOrEmptySpace(columnLetter) === true) {
+     isNullOrEmptySpace( columnLetter ) === true ) {
      return false;
   }
 
   // with the columnLetter, we can get the correct range to format correctly
-  var entireColumn = sheet.getRange(columnLetter + ':' + columnLetter).offset(1, 0);
+  var entireColumn = sheet.getRange( columnLetter + ':' + columnLetter ).offset( 1, 0 );
 
   // set the format for this range which should cover all future entries
   // https://developers.google.com/apps-script/reference/spreadsheet/range#setNumberFormat(String)
   // https://developers.google.com/sheets/api/guides/formats
-  entireColumn.setNumberFormat("$#.00");
-  
+  entireColumn.setNumberFormat( '$#.00' );
+
   var rule = SpreadsheetApp.newDataValidation()
-  .requireNumberGreaterThanOrEqualTo(0)
-  .setAllowInvalid(false)
-  .setHelpText('Amount must be greater than 0')
+  .requireNumberGreaterThanOrEqualTo( 0 )
+  .setAllowInvalid( false )
+  .setHelpText( 'Amount must be greater than 0' )
   .build();
-  entireColumn.setDataValidation(rule);
+  entireColumn.setDataValidation( rule );
 
   return true;
 }
@@ -365,23 +370,24 @@ function setCurrencyFmt(sheet, header, columnLetter) {
 * . @param   columnLetter
 * . @return .boolean
 */
-function setEmailFmt(sheet, header, columnLetter) {
+function setEmailFmt( sheet, header, columnLetter ) {
+
   // makes sure the header equals "EMAIL"
-  if (isNullOrEmptySpace(header) === true ||
-      header.toLowerCase() !== 'email') {
-      return false; 
+  if ( isNullOrEmptySpace( header ) === true ||
+      header.toLowerCase() !== 'email' ) {
+      return false;
   }
-  
+
   // with the columnLetter, we can get the correct range to format correctly
-  var entireColumn = sheet.getRange(columnLetter + ':' + columnLetter).offset(1, 0);
-  
+  var entireColumn = sheet.getRange( columnLetter + ':' + columnLetter ).offset( 1, 0 );
+
   // set the data validation rule for email addresses
   var rule = SpreadsheetApp.newDataValidation()
   .requireTextIsEmail()
-  .setAllowInvalid(false)
-  .setHelpText('Must be a valid email address')
+  .setAllowInvalid( false )
+  .setHelpText( 'Must be a valid email address' )
   .build();
-  entireColumn.setDataValidation(rule);
+  entireColumn.setDataValidation( rule );
 
   return true;
 }
@@ -392,36 +398,37 @@ function setEmailFmt(sheet, header, columnLetter) {
 * . @param  array       headers     The headers to add to the Spreadsheet.
 * . @return Spreadsheet
 */
-function initializeFile(spreadsheet, headers) {
-  if (spreadsheet === null) {
+function initializeFile( spreadsheet, headers ) {
+  if ( spreadsheet === null ) {
     return null;
   }
 
   // get the first sheet of the spreadsheet
-  var sheet = spreadsheet.getSheets()[0];
+  var sheet = spreadsheet.getSheets()[ 0 ];
 
   // add the headers to the first cell in each column in the first row (A)
   var numHeaders = headers.length;
 
-  for (var i = 0; i < numHeaders; i++) {
-    var columnLetter = getColumnLetter(i + 1);
-    var header = headers[i];
+  for ( var i = 0; i < numHeaders; i++ ) {
+    var columnLetter = getColumnLetter( i + 1 );
+    var header = headers[ i ];
+
     // https://developers.google.com/apps-script/reference/spreadsheet/range#getCell(Integer,Integer)
     // https://developers.google.com/apps-script/reference/spreadsheet/range#setValue(Object)
-    var headerCell = sheet.getRange(columnLetter + "1");
-    headerCell.setValue(headers[i]);
+    var headerCell = sheet.getRange( columnLetter + '1' );
+    headerCell.setValue( headers[ i ] );
 
     // set the column format to DateTime if applicable
-    setColDateTimeFmt(sheet, header, columnLetter);
+    setColDateTimeFmt( sheet, header, columnLetter );
 
     // set the column format to Numbers if applicable
-    setIdFmt(sheet, header, columnLetter);
+    setIdFmt( sheet, header, columnLetter );
 
     // set the column format for currency if applicable
-    setCurrencyFmt(sheet, header, columnLetter);
-    
+    setCurrencyFmt( sheet, header, columnLetter );
+
     // set the column format for email if applicable
-    setEmailFmt(sheet, header, columnLetter);
+    setEmailFmt( sheet, header, columnLetter );
   }
 
   // TODO: Use DataValidation to make sure that all IDs are unique (A column)
@@ -430,7 +437,7 @@ function initializeFile(spreadsheet, headers) {
 
   // freeze the first row
   // https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet#setFrozenRows(Integer)
-  sheet.setFrozenRows(1);
+  sheet.setFrozenRows( 1 );
 
   return spreadsheet;
 }
@@ -440,23 +447,23 @@ function initializeFile(spreadsheet, headers) {
 * . @param  string folderName
 * . @return Folder
 */
-function getFolder(folderName) {
-  
+function getFolder( folderName ) {
+
   if ( isNullOrEmptySpace( folderName ) === true ) {
      return null;
   }
-  
+
   var appFolder = getAppFolder();
-  
+
   return dirGetOrCreate( appFolder, folderName );
 }
 
 function getDataFolder() {
-   return getFolder( 'data' ); 
+   return getFolder( 'data' );
 }
 
 function getReportsFolder() {
-   return getFolder( 'reports' ); 
+   return getFolder( 'reports' );
 }
 
 /**
@@ -466,18 +473,18 @@ function getReportsFolder() {
 * . @return Folder
 */
 function dirGetOrCreate( parentFolder, folderName ) {
-  
+
    if ( isNullOrEmptySpace( parentFolder ) === true ||
        isNullOrEmptySpace( folderName ) === true ) {
      return null;
    }
-  
+
   // see if the folder already exists
   // https://developers.google.com/apps-script/reference/drive/drive-app#getFoldersByName(String)
   // Returns FolderIterator
   // https://developers.google.com/apps-script/reference/drive/folder-iterator
   var folders = parentFolder.getFoldersByName( folderName );
-  
+
   // https://developers.google.com/apps-script/reference/drive/drive-app#createFolder(String)
   // returns Folder
   // https://developers.google.com/apps-script/reference/drive/folder
@@ -496,23 +503,23 @@ function getAppFolder() {
 
   // get the folder name for the app folder
   var appFolderName = PropertiesService.getScriptProperties()
-  .getProperty("appFolderName");
+  .getProperty( 'appFolderName' );
 
   // stop here if the string is null or empty space
   if ( isNullOrEmptySpace( appFolderName ) === true ) {
      log( 'getAppFolder(); could not retrieve the folder name for this add-on from the PropertiesService.' );
      return null;
   }
-  
+
   // "apps" folder within root Google Drive folder
-  var appsRoot = "apps";
-  
+  var appsRoot = 'apps';
+
   // create the apps folder
   var rootAppsFolder = dirGetOrCreate( root, appsRoot );
-  
+
   // create the apps/donation-tracker folder
   var donationTrackerFolder = dirGetOrCreate( rootAppsFolder, appFolderName );
-  
+
   // return the Folder object
   return donationTrackerFolder;
 }
@@ -569,12 +576,13 @@ function isEmptyObject( obj ) {
 * . @return boolean
 */
 function saveData( filename, rowId, data ) {
+
   // 0. Make sure the filename is not null or empty
   if ( isNullOrEmptySpace( filename ) === true ) {
     log( 'saveData(); could not save data as no filename was specified. stopping...' );
     return false;
   }
-  
+
   // 1. Is this an update or a create? The row ID decides.
   var originalRowId = rowId;
   if ( isNullOrEmptySpace( rowId ) === true ||
@@ -582,7 +590,7 @@ function saveData( filename, rowId, data ) {
      rowId = getNextId( filename );
   }
   log( 'saveData(); calculated id: ' + rowId );
-  
+
   // See if rowId is empty
   var isNewRow = isNullOrEmptySpace( originalRowId ) === true ||
       parseInt( originalRowId, 10 ) !== parseInt( rowId, 10 );
@@ -597,8 +605,8 @@ function saveData( filename, rowId, data ) {
   // Stop here if there is no row id
   // if we are inserting data, the new row id is given in the
   // above if statement
-  if ( isNullOrEmptySpace(rowId) === true ) {
-     log('saveData(); no id was available, stopping here...');
+  if ( isNullOrEmptySpace( rowId ) === true ) {
+     log( 'saveData(); no id was available, stopping here...' );
      return false;
   }
 
@@ -616,10 +624,10 @@ function saveData( filename, rowId, data ) {
 
   // 3. Get headers for this filename
   var headers = getHeaders( filename );
-  
+
   // keep only the digits if a phone number is specified
-  if ( headers.indexOf( 'PHONE' ) !== -1 && data[ 'PHONE' ] !== null ) {
-     data[ 'PHONE' ] = cleanPhoneNumber( data[ 'PHONE' ] );
+  if ( headers.indexOf( 'PHONE' ) !== -1 && data.PHONE !== null ) {
+     data.PHONE = cleanPhoneNumber( data.PHONE );
   }
 
   log( 'saveData(); headers: ' + JSON.stringify( headers ) );
@@ -629,12 +637,12 @@ function saveData( filename, rowId, data ) {
   var sheet = getSheetFromSpreadsheet( filename );
 
   for ( var key in data ) {
-    
+
     // skip the CREATED_AT and SUBMITTER headers if this is
     // not a new record to prevent overwriting the data
     if ( isNewRow === false && ( key === 'CREATED_AT' || key === 'SUBMITTER' ) ) {
        log( 'saveData(); skipping "' + key + '" for existing record #' + rowId );
-       continue; 
+       continue;
     }
 
      // 5. Get the cell for the given header
@@ -720,46 +728,47 @@ function getNextId( filename ) {
 * . @param  boolean showTrashed
 * . @return string
 */
-function fillPicker(filename, sortArray, showTrashed) {
-  var data =  getAllData(filename);
-  var output = '<option value="">Select an item...</option>'.replace(/\-/g, ' ');
-  
+function fillPicker( filename, sortArray, showTrashed ) {
+  var data =  getAllData( filename );
+  var output = '<option value="">Select an item...</option>'.replace( /\-/g, ' ' );
+
   if ( data === null ) {
      log( 'fillPicker(); the file was not loaded...' );
      return output;
   }
-  
+
   var rowCount = data.getNumRows();
-  var headers = getHeaders(filename);
-  var idColIndex = getColumnIndex(headers, 'id');
-  var deletedAtColIndex = getColumnIndex(headers, 'deleted_at');
-  
+  var headers = getHeaders( filename );
+  var idColIndex = getColumnIndex( headers, 'id' );
+  var deletedAtColIndex = getColumnIndex( headers, 'deleted_at' );
+
   // sort the data using the sort array
-  data = data.sort(sortArray);
-  
+  data = data.sort( sortArray );
+
   // loop through all of the cells in order to fill the picker
-  for (var row = 1; row <= rowCount; row++) {
-    var values = getCellValues(data, row, sortArray);
+  for ( var row = 1; row <= rowCount; row++ ) {
+    var values = getCellValues( data, row, sortArray );
+
     // Skip the data if:
     // 1. ID of the row (cell value in ID column) is empty
     // 2. row is deleted and showTrashed !== true
     // 3. the values specified for the columns in the sortArray are empty
-    var id = data.getCell(row, idColIndex).getValue();
+    var id = data.getCell( row, idColIndex ).getValue();
     var deletedAt =
-        data.getCell(row, deletedAtColIndex).getValue();
-    
+        data.getCell( row, deletedAtColIndex ).getValue();
+
     // if the data is invalid or deleted and showTrashed is not true,
     // then simply skip over this row of data
-    if (isNullOrEmptySpace(id) || values.length === 0 ||
-        (showTrashed !== true && isNullOrEmptySpace(deletedAt) === false)) {
-       continue; 
+    if ( isNullOrEmptySpace( id ) || values.length === 0 ||
+        ( showTrashed !== true && isNullOrEmptySpace( deletedAt ) === false ) ) {
+       continue;
     }
-    
+
     output += '<option value="' + id + '">';
     output += titleCase( values.join( ' ' ) );
     output += '</option>';
   }
-  
+
   return output;
 }
 
@@ -772,15 +781,15 @@ function fillPicker(filename, sortArray, showTrashed) {
 * . @param . array  sortArray
 * . @return  array
 */
-function getCellValues(data, rowIndex, sortArray) {
+function getCellValues( data, rowIndex, sortArray ) {
   var values = [];
-  
-  for (var key in sortArray) {
-    var value = data.getCell(rowIndex, sortArray[key].column).getValue();
-    if (isNullOrEmptySpace( value ) === false ) {
-          values.push( value.trim() );      
+
+  for ( var key in sortArray ) {
+    var value = data.getCell( rowIndex, sortArray[ key ].column ).getValue();
+    if ( isNullOrEmptySpace( value ) === false ) {
+          values.push( value.trim() );
     }
   }
-  
+
   return values;
 }

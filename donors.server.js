@@ -6,7 +6,7 @@
 * . @returns Spreadsheet|null
 */
 function getDonorsFile() {
-  return getFile("donorsSpreadsheetFileName");
+  return getFile( 'donorsSpreadsheetFileName' );
 }
 
 
@@ -15,32 +15,32 @@ function getDonorsFile() {
 */
 function fillStatePicker() {
    var states = getStates();
-  
+
   var output = '<option value="">Select a state...</option>';
-  
+
   for ( var key in states ) {
-   
+
     output += '<option value="' + key + '">' +
-      states[key] + '</option>';    
+      states[ key ] + '</option>';
   }
-   
+
   return output;
 }
 
-function fillUsersPicker(showTrashed) {
+function fillUsersPicker( showTrashed ) {
   var filename = 'donors';
-  var headers = getHeaders(filename);
-  var firstNameColIndex = getColumnIndex(headers, 'firstname');
-  var middleColIndex = getColumnIndex(headers, 'mi');
-  var lastNameColIndex = getColumnIndex(headers, 'lastname');
-  var suffixColIndex = getColumnIndex(headers, 'suffix');
+  var headers = getHeaders( filename );
+  var firstNameColIndex = getColumnIndex( headers, 'firstname' );
+  var middleColIndex = getColumnIndex( headers, 'mi' );
+  var lastNameColIndex = getColumnIndex( headers, 'lastname' );
+  var suffixColIndex = getColumnIndex( headers, 'suffix' );
   var sortArray = [
-      {column: firstNameColIndex, ascending: true},
-      {column: lastNameColIndex, ascending: true},
-      {column: suffixColIndex, ascending: true}
+      { column: firstNameColIndex, ascending: true },
+      { column: lastNameColIndex, ascending: true },
+      { column: suffixColIndex, ascending: true }
   ];
-  
-  return fillPicker(filename, sortArray, showTrashed);
+
+  return fillPicker( filename, sortArray, showTrashed );
 }
 
 /**
@@ -49,7 +49,7 @@ function fillUsersPicker(showTrashed) {
 * . @return string
 */
 //function fillUsersPicker(showTrashed) {
-//  
+//
 //  var data = getAllDonors();
 //  var rowCount = data.getNumRows();
 //  var output = '<option value="">Select a user...</option>';
@@ -59,7 +59,7 @@ function fillUsersPicker(showTrashed) {
 //  var lastNameColIndex = getColumnIndex(headers, 'lastname');
 //  var idColIndex = getColumnIndex(headers, 'id');
 //  var deletedAtColIndex = getColumnIndex(headers, 'deleted_at');
-//  
+//
 //  // sort the data now that we have the index for the
 //  // firstname and lastname headers
 //  data = data.sort(
@@ -68,7 +68,7 @@ function fillUsersPicker(showTrashed) {
 //      {column: lastNameColIndex, ascending: true}
 //    ]
 //  );
-//  
+//
 //  // loop through all of the cells in order to fill the Users picker
 //  for (var row = 1; row <= rowCount; row++) {
 //    var firstName = data.getCell(row, firstNameColIndex).getValue();
@@ -76,18 +76,18 @@ function fillUsersPicker(showTrashed) {
 //    var id = data.getCell(row, idColIndex).getValue();
 //    var deletedAt =
 //        data.getCell(row, deletedAtColIndex).getValue();
-//    
+//
 //    // if the data is invalid or deleted and showTrashed is not true,
 //    // then simply skip over this row of data
 //    if (isNullOrEmptySpace(id) || isNullOrEmptySpace(firstName) ||
 //       (showTrashed !== true && isNullOrEmptySpace(deletedAt) === false)) {
-//       continue; 
+//       continue;
 //    }
-//    
+//
 //    output += '<option value="' + id + '">' +
-//      titleCase(firstName + ' ' + lastName) + '</option>';    
-//  }  
-//  
+//      titleCase(firstName + ' ' + lastName) + '</option>';
+//  }
+//
 //  return output;
 //}
 
@@ -96,8 +96,3 @@ function fillUsersPicker(showTrashed) {
 //  log('getDonorObject(); user #' + userId + ': ' + JSON.stringify(object));
 //  return object;
 //}
-
-
-
-
-
