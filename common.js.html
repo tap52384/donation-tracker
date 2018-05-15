@@ -9,76 +9,77 @@
 function isNullOrEmpty( x ) {
     return x === undefined || x === '' || x === null;
 }
-  
+
 /**
 * Returns true if the specified variable is null, empty, or with all spaces
 * removed an empty string.
 */
 function isNullOrEmptySpace( x ) {
-  return isNullOrEmpty( x ) || typeof x.trim === 'function' && isNullOrEmpty( x.trim().replace( / /g, '' ) );
+  return isNullOrEmpty( x ) || typeof x.trim === 'function' &&
+  isNullOrEmpty( x.trim().replace( / /g, '' ) );
 }
 
-function getValue(id) {
-  var element = document.getElementById(id);
-  
-  return element === null || isNullOrEmptySpace(element.value) ? '' : element.value;
+function getValue( id ) {
+  var element = document.getElementById( id );
+
+  return element === null || isNullOrEmptySpace( element.value ) ? '' : element.value;
 }
 
-function disable(id, value) {
-  var element = document.getElementById(id);
-  
-  if (element === null) {
+function disable( id, value ) {
+  var element = document.getElementById( id );
+
+  if ( element === null ) {
     return false;
   }
-  
+
   element.disable = true;
-  
+
   return true;
 }
 
-function enable(id) {
-  var element = document.getElementById(id);
-  
-  if (element === null) {
+function enable( id ) {
+  var element = document.getElementById( id );
+
+  if ( element === null ) {
     return false;
   }
-  
+
   element.disable = false;
-  
+
   return true;
 }
 
 function showSpinner() {
-  var element = document.getElementById('loading-spinner');
-  var button = document.querySelector('button[type="submit"]');
-  
-  if (element === null || button === null) {
+  var element = document.getElementById( 'loading-spinner' );
+  var button = document.querySelector( 'button[type="submit"]' );
+
+  if ( element === null || button === null ) {
      return false;
   }
-  
+
   // show the spinner
   element.style.display = 'inline';
   button.disabled = true;
-  
+
   // also should disable the submit button
-  disable('submit');
-  disable('delete');
+  disable( 'submit' );
+  disable( 'delete' );
 }
 
 function hideSpinner() {
-  var element = document.getElementById('loading-spinner');
-  var button = document.querySelector('button[type="submit"]');
+  var element = document.getElementById( 'loading-spinner' );
+  var button = document.querySelector( 'button[type="submit"]' );
 
-  if (element === null || button === null) {
+  if ( element === null || button === null ) {
      return false;
   }
-  
+
   // show the spinner
   element.style.display = 'none';
   button.disabled = false;
-  
+
   // also should enable the submit button
-  enable('submit');
+  enable( 'submit' );
 }
 
 /**
@@ -86,10 +87,9 @@ function hideSpinner() {
 * . @param  string email
 * . @return boolean
 */
-function isValidEmail(email) 
-{
+function isValidEmail( email ) {
     var re = /\S+@\S+/;
-    return re.test(email);
+    return re.test( email );
 }
 
 /**
@@ -97,10 +97,10 @@ function isValidEmail(email)
 * . @param  string result
 * . @return void
 */
-function getObjectFailed(result) {
-    window.console.log('getObjectFailed(); result: ' + JSON.stringify(result));
-    window.console.log('getObjectFailed(); result: ' + result);
-    
+function getObjectFailed( result ) {
+    window.console.log( 'getObjectFailed(); result: ' + JSON.stringify( result ) );
+    window.console.log( 'getObjectFailed(); result: ' + result );
+
     // hide the spinner
     hideSpinner();
 }
@@ -108,39 +108,39 @@ function getObjectFailed(result) {
 /**
   * . Once a user is selected, this fills in the fields with the user details.
   */
-  function fillDetails(object) {
+  function fillDetails( object ) {
     var isEmptyObject = true;
-    
+
     // clear the fields first
     clearAllFields();
-    
+
     // loops through the keys in the object and sets the values
-    for (var key in object) {
-      if (isNullOrEmptySpace( key ) === true) {
-         window.console.log('fillDetails(); the key is null or empty space. skipping...');
+    for ( var key in object ) {
+      if ( isNullOrEmptySpace( key ) === true ) {
+         window.console.log( 'fillDetails(); the key is null or empty space. skipping...' );
          continue;
       }
-      
+
       // find the form element
-      var element = document.getElementById(key.toLowerCase());
-      
-      if (element === null) {
-         window.console.log('fillDetails(); the element for key ' + key +
-         ' could not be found. skipping...');
+      var element = document.getElementById( key.toLowerCase() );
+
+      if ( element === null ) {
+         window.console.log( 'fillDetails(); the element for key ' + key +
+         ' could not be found. skipping...' );
          continue;
       }
-      
-      element.value = object[key];
-      
+
+      element.value = object[ key ];
+
       // marks the flag showing that this object is not empty
       isEmptyObject = false;
     }
-    
-    window.console.log('fillDetails(); data: ' + JSON.stringify(object));
-    
+
+    window.console.log( 'fillDetails(); data: ' + JSON.stringify( object ) );
+
     // enable the delete button
-    document.getElementById('delete').disabled = ( isEmptyObject === true ? true : false );
-    
+    document.getElementById( 'delete' ).disabled = ( isEmptyObject === true ? true : false );
+
     // hide the spinner
     hideSpinner();
   }
@@ -148,123 +148,124 @@ function getObjectFailed(result) {
   /**
   * . Universal function for preparing data to be saved
   */
-  function prepareSaveData2(fileName, selectId, headers) {
-    window.console.log('submit(' + fileName + '); headers: ' + headers);
-    
+  function prepareSaveData2( fileName, selectId, headers ) {
+    window.console.log( 'submit(' + fileName + '); headers: ' + headers );
+
     // get all of the data on the page using the headers
-    var data = collect(headers);
-    
+    var data = collect( headers );
+
     // add the id to the data
-    var recordId = getValue('selectId');
-    data['ID'] = recordId;
-    
-    window.console.log('submit(' + fileName + '); data: ' + JSON.stringify(data));
-    
-    google.script.run.withSuccessHandler(saveResult)
-    .withFailureHandler(hideSpinner)
-    .saveData(fileName, recordId, data);
+    var recordId = getValue( 'selectId' );
+    data.ID = recordId;
+
+    window.console.log( 'submit(' + fileName + '); data: ' + JSON.stringify( data ) );
+
+    google.script.run.withSuccessHandler( saveResult )
+    .withFailureHandler( hideSpinner )
+    .saveData( fileName, recordId, data );
   }
-  
+
   /**
   * . Using the headers of the spreadsheet managed by this page,
   * . get the values from all inputs with the same id.
   * . @return object
   */
-  function collect(headers) {
+  function collect( headers ) {
     var object = {};
-    
-    window.console.log('collect(); headers: ' + JSON.stringify(headers));
-    
-    for (var key in headers) {
-      var header = headers[key];
-      if (isNullOrEmptySpace(key) === true ||
-      isNullOrEmptySpace(headers[key]) === true) {
-        window.console.log('collect(); key is null or empty space');
+
+    window.console.log( 'collect(); headers: ' + JSON.stringify( headers ) );
+
+    for ( var key in headers ) {
+      var header = headers[ key ];
+      if ( isNullOrEmptySpace( key ) === true ||
+      isNullOrEmptySpace( headers[ key ] ) === true ) {
+        window.console.log( 'collect(); key is null or empty space' );
         continue;
       }
-      
+
       // retrieves the value for the given input, trimming whitespace
       var id = header.toLowerCase();
-      object[header] = getValue(id).trim();
-      
-      window.console.log('collect(); header: ' + header);
-      window.console.log('collect(); value: ' + object[header]);   
+      object[ header ] = getValue( id ).trim();
+
+      window.console.log( 'collect(); header: ' + header );
+      window.console.log( 'collect(); value: ' + object[ header ] );
     }
-    
+
     window.console.log( 'collect(); values: ' + JSON.stringify( object ) );
-  
+
     return object;
   }
-  
+
   /**
   * . Returns true if the given string represents a valid date.
   * . @param   string  dateString
   * . @returns boolean
   */
   function isValidDate( dateString ) {
-     
-     dateString = (dateString + '').trim();
+
+     dateString = ( dateString + '' ).trim();
      if ( isNullOrEmptySpace( dateString ) === true ||
      dateString.match( /[0-9]{4}-[0-9]{2}-[0-9]{2}/ ) === null ) {
         return false;
      }
-     
-     var year = dateString.substr(0, 4);
-     var month = dateString.substr(5, 2);
-     var day = dateString.substr(7);
-     var date = new Date(year, month, day);
-     
-     window.console.log('year:  ' + year);
-     window.console.log('month: ' + month);
-     window.console.log('day:   ' + day);
-     window.console.log('date:  ' + date);
-     
+
+     var year = dateString.substr( 0, 4 );
+     var month = dateString.substr( 5, 2 );
+     var day = dateString.substr( 7 );
+     var date = new Date( year, month, day );
+
+     window.console.log( 'year:  ' + year );
+     window.console.log( 'month: ' + month );
+     window.console.log( 'day:   ' + day );
+     window.console.log( 'date:  ' + date );
+
      // validate to make sure the date is valid
      // https://stackoverflow.com/a/1353711/1620794
      return isNaN( date ) === false;
   }
-  
+
   /**
   * . Returns true if the specified input already exists in the menu.
-  * . @param   array  inputArray An array of element IDs for the 
+  * . @param   array  inputArray An array of element IDs for the
   inputs that are used to create the text in the <select> element
   * . @param   string select The CSS selector for the <select> element
   * . @returns array Array of IDs the # of matching options in the
   <select> element, excluding the current one if it exists
   */
-  function exists(inputArray, select) {
-    
+  function exists( inputArray, select ) {
+
     // 1. Using the IDs of the elements that specify the name of a unique record,
     // create the text
     var text = '';
-    
+
     // array of matches
     var matches = [];
-    
+
     // creates the text that is displayed in the <select> element using
     // the IDs of the elements specified in the inputArray
-    for (var key in inputArray) {
+    for ( var key in inputArray ) {
+
        // gets the value of the input
-       var input = getValue(inputArray[ key ]).trim().toLowerCase();
-       
+       var input = getValue( inputArray[ key ] ).trim().toLowerCase();
+
        window.console.log( 'exists(); key: ' + key );
        window.console.log( 'exists(); value id: ' + inputArray[ key ] );
        window.console.log( 'exists(); value: ' + input );
-       
+
        // skip if the input is empty
        if ( isNullOrEmptySpace( input ) === true ) {
          continue;
        }
-       
+
        if ( isNullOrEmptySpace( text ) === false ) {
          text += ' ';
        }
-       
+
        text += input;
     }
-    
+
     window.console.log( 'exists(); form input: ' + text );
-    
+
     // if this happens, then the validation prior to calling this function
     // did not catch everything. This should basically never happen
     if ( isNullOrEmptySpace( text ) === true ) {
@@ -272,82 +273,85 @@ function getObjectFailed(result) {
        'this should almost never happen.' );
        return matches;
     }
-    
+
     // 2. Loop through each <option> in the <select> and see if the textcontent matches
-    var menu = document.getElementById(select);
-    
+    var menu = document.getElementById( select );
+
     if ( menu === null ) {
        window.console.error( 'exists(); could not find select' );
        return false;
     }
-    
+
     var options = menu.options;
-    
+
     if ( isNullOrEmptySpace( menu.options ) === true ||
     menu.options.length === 0 ) {
        window.console.log( 'exists(); no options in <select>' );
        return matches;
     }
-    
+
     var menuIndex = menu.selectedIndex;
+
     // a string
     var selectedId = menu.options[ menuIndex ].value;
     var count = menu.options.length;
-    
+
     window.console.log( 'exists(); selected index: ' + menuIndex );
     window.console.log( 'exists(); selected id: ' + selectedId );
     window.console.log( 'exists(); # of options: ' + count );
-    
-    
+
+
     // loop through each <option> within the <select> and get the text
     // compare the strings to see if they are equal
-    for (var i = 0; i < count; i++) {
+    for ( var i = 0; i < count; i++ ) {
        var option = menu.options[ i ];
-       var optionText = (option.text + '').trim().toLowerCase();
+       var optionText = ( option.text + '' ).trim().toLowerCase();
        var optionIndex = option.index;
-       
+
        window.console.log( 'exists(); option text:  ' + optionText );
        window.console.log( 'exists(); option index: ' + option.index );
-       window.console.log( 'exists(); text equal: ' + (optionText === text) );
-       window.console.log( 'exists(); indexes equal: ' + (menuIndex === option.index) );
-       
+       window.console.log( 'exists(); text equal: ' + ( optionText === text ) );
+       window.console.log( 'exists(); indexes equal: ' + ( menuIndex === option.index ) );
+
        // if the text is the same and the current option index equals
        // the index of the selected item (the one currently being edited / created )
        // then do not include it!
-       if (isNullOrEmptySpace(menuIndex) === false &&
-       parseInt(menuIndex, 10) === option.index &&
-       optionText === text) {
+       if ( isNullOrEmptySpace( menuIndex ) === false &&
+       parseInt( menuIndex, 10 ) === option.index &&
+       optionText === text ) {
          window.console.log( 'exists(); editing existing record, no text change...' );
          continue;
        }
-       
-       if (optionText !== text) {
+
+       if ( optionText !== text ) {
          continue;
        }
-       
+
        // text matches
        window.console.log( 'exists(); current text match: ' + optionText );
-       matches.push(option.index);
-    }    
-    
-    window.console.log( 'exists(); matched ids: ' + JSON.stringify(matches));
-  
+       matches.push( option.index );
+    }
+
+    window.console.log( 'exists(); matched ids: ' + JSON.stringify( matches ) );
+
     // return an array containing any matches
     return matches;
   }
-  
+
   // handles the close button
-  document.getElementById('close').addEventListener('click', function( event ) {
+  document.getElementById( 'close' ).addEventListener( 'click', function( event ) {
+
      // closes the dialog window
      // https://developers.google.com/apps-script/guides/html/reference/host
      google.script.host.close();
-  
+
   } );
-  
+
   document.getElementById( 'reset' ).addEventListener( 'click', function( event ) {
+
     // disable the delete button
     var button = document.getElementById( 'delete' );
-    if (button !== null) {
+    if ( button !== null ) {
       button.disabled = true;
     }
   } );
