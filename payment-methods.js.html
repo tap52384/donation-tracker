@@ -9,7 +9,7 @@ function clearAllFields() {
 }
 
 function addPaymentMethodsHtml(output) {
-    window.console.log( 'addPaymentMethodsHtml(); about to set <select> innerHTML...' );
+    log( 'addPaymentMethodsHtml(); about to set <select> innerHTML...' );
     document.getElementById('payment-methods').innerHTML = output;
 
     // clear the fields first
@@ -42,8 +42,8 @@ function validateInput() {
      'want to add it?') :
      true;
 
-     window.console.log( 'validateInput(); error: ' + error);
-     window.console.log( 'validateInput(); okToAdd: ' + okToAdd);
+     log( 'validateInput(); error: ' + error);
+     log( 'validateInput(); okToAdd: ' + okToAdd);
 
      // return true if all required values are given and either the
      // data already exists, is brand new, or the user confirmed adding
@@ -73,7 +73,7 @@ function saveResult(result) {
     // clear all fields
     clearAllFields();
 
-    window.console.log('save worked!');
+    log('save worked!');
 
     // reload the payment-methods menu
     google.script.run.withSuccessHandler(addPaymentMethodsHtml)
@@ -87,7 +87,7 @@ function saveResult(result) {
   * . Gets the headers for the "donors" file and saves the data.
   */
   function prepareSaveData(headers) {
-    window.console.log('submit(payment-methods); headers: ' + headers);
+    log('submit(payment-methods); headers: ' + headers);
 
     // get all of the data on the page using the headers
     var data = collect(headers);
@@ -96,7 +96,7 @@ function saveResult(result) {
     var userId = getValue('payment-methods');
     data['ID'] = userId;
 
-    window.console.log('submit(payment-methods); data: ' + JSON.stringify(data));
+    log('submit(payment-methods); data: ' + JSON.stringify(data));
 
     google.script.run.withSuccessHandler(saveResult)
     .withFailureHandler(hideSpinner)
@@ -134,7 +134,7 @@ document.getElementById('payment-methods').onchange = function( event ) {
      // clear all fields
      clearAllFields();
 
-     window.console.log('#payment-methods (change): about to get payment-methods object #' + userId);
+     log('#payment-methods (change): about to get payment-methods object #' + userId);
 
      // asynchronously get the user details and fill the <select> menu
      google.script.run.withSuccessHandler(fillDetails)

@@ -93,13 +93,56 @@ function isValidEmail( email ) {
 }
 
 /**
+ * Returns true if the object is a string.
+ * @param  {[type]}  s [description]
+ * @return {Boolean}   [description]
+ */
+function isValidStringObject( s ) {
+    return !isNullOrEmpty( s ) &&
+    Object.prototype.toString.call( s ) === '[object String]';
+}
+
+/**
+ * Logs the specified text to the console if it is available.
+ * @param  {[type]} text  [description]
+ * @param  {[type]} error [description]
+ * @return {[type]}       [description]
+ */
+function log( text, error ) {
+    if ( isNullOrEmpty( text ) ) {
+        return;
+    }
+
+    // 2015.03.04 - if the parameter is not a string, then break down what it is
+    if ( isValidStringObject( text ) === false ) {
+        text = JSON.stringify( text );
+    }
+
+    if ( window.console ) {
+
+        if ( error && window.console.error ) {
+          window.console.error( text );
+        } else if ( window.console.log ) {
+          window.console.log( text );
+        }
+    } else if ( document.console ) {
+
+        if ( error && document.console.error ) {
+          document.console.error( text );
+        } else if ( document.console.log ) {
+          document.console.log( text );
+        }
+    }
+}
+
+/**
 * . Logs what happened when the app fails to retrieve a record.
 * . @param  string result
 * . @return void
 */
 function getObjectFailed( result ) {
-    window.console.log( 'getObjectFailed(); result: ' + JSON.stringify( result ) );
-    window.console.log( 'getObjectFailed(); result: ' + result );
+    log( 'getObjectFailed(); result: ' + JSON.stringify( result ) );
+    log( 'getObjectFailed(); result: ' + result );
 
     // hide the spinner
     hideSpinner();
@@ -117,7 +160,7 @@ function getObjectFailed( result ) {
     // loops through the keys in the object and sets the values
     for ( var key in object ) {
       if ( isNullOrEmptySpace( key ) === true ) {
-         window.console.log( 'fillDetails(); the key is null or empty space. skipping...' );
+         log( 'fillDetails(); the key is null or empty space. skipping...' );
          continue;
       }
 
@@ -125,7 +168,7 @@ function getObjectFailed( result ) {
       var element = document.getElementById( key.toLowerCase() );
 
       if ( element === null ) {
-         window.console.log( 'fillDetails(); the element for key ' + key +
+         log( 'fillDetails(); the element for key ' + key +
          ' could not be found. skipping...' );
          continue;
       }
@@ -136,7 +179,7 @@ function getObjectFailed( result ) {
       isEmptyObject = false;
     }
 
-    window.console.log( 'fillDetails(); data: ' + JSON.stringify( object ) );
+    log( 'fillDetails(); data: ' + JSON.stringify( object ) );
 
     // enable the delete button
     document.getElementById( 'delete' ).disabled = ( isEmptyObject === true ? true : false );
@@ -149,7 +192,7 @@ function getObjectFailed( result ) {
   * . Universal function for preparing data to be saved
   */
   function prepareSaveData2( fileName, selectId, headers ) {
-    window.console.log( 'submit(' + fileName + '); headers: ' + headers );
+    log( 'submit(' + fileName + '); headers: ' + headers );
 
     // get all of the data on the page using the headers
     var data = collect( headers );
@@ -158,7 +201,7 @@ function getObjectFailed( result ) {
     var recordId = getValue( 'selectId' );
     data.ID = recordId;
 
-    window.console.log( 'submit(' + fileName + '); data: ' + JSON.stringify( data ) );
+    log( 'submit(' + fileName + '); data: ' + JSON.stringify( data ) );
 
     google.script.run.withSuccessHandler( saveResult )
     .withFailureHandler( hideSpinner )
@@ -173,25 +216,26 @@ function getObjectFailed( result ) {
   function collect( headers ) {
     var object = {};
 
-    window.console.log( 'collect(); headers: ' + JSON.stringify( headers ) );
+    log( 'collect(); headers: ' + JSON.stringify( headers ) );
 
     for ( var key in headers ) {
       var header = headers[ key ];
       if ( isNullOrEmptySpace( key ) === true ||
       isNullOrEmptySpace( headers[ key ] ) === true ) {
-        window.console.log( 'collect(); key is null or empty space' );
+        log( 'collect(); key is null or empty space' );
         continue;
       }
 
-      // retrieves the value for the given input, trimming whitespace
+      // retrieves the value for the given input, trimming whitespace from
+      // the ends
       var id = header.toLowerCase();
       object[ header ] = getValue( id ).trim();
 
-      window.console.log( 'collect(); header: ' + header );
-      window.console.log( 'collect(); value: ' + object[ header ] );
+      log( 'collect(); header: ' + header );
+      log( 'collect(); value: ' + object[ header ] );
     }
 
-    window.console.log( 'collect(); values: ' + JSON.stringify( object ) );
+    log( 'collect(); values: ' + JSON.stringify( object ) );
 
     return object;
   }
@@ -214,10 +258,10 @@ function getObjectFailed( result ) {
      var day = dateString.substr( 7 );
      var date = new Date( year, month, day );
 
-     window.console.log( 'year:  ' + year );
-     window.console.log( 'month: ' + month );
-     window.console.log( 'day:   ' + day );
-     window.console.log( 'date:  ' + date );
+     log( 'year:  ' + year );
+     log( 'month: ' + month );
+     log( 'day:   ' + day );
+     log( 'date:  ' + date );
 
      // validate to make sure the date is valid
      // https://stackoverflow.com/a/1353711/1620794
@@ -248,9 +292,9 @@ function getObjectFailed( result ) {
        // gets the value of the input
        var input = getValue( inputArray[ key ] ).trim().toLowerCase();
 
-       window.console.log( 'exists(); key: ' + key );
-       window.console.log( 'exists(); value id: ' + inputArray[ key ] );
-       window.console.log( 'exists(); value: ' + input );
+       log( 'exists(); key: ' + key );
+       log( 'exists(); value id: ' + inputArray[ key ] );
+       log( 'exists(); value: ' + input );
 
        // skip if the input is empty
        if ( isNullOrEmptySpace( input ) === true ) {
@@ -264,12 +308,12 @@ function getObjectFailed( result ) {
        text += input;
     }
 
-    window.console.log( 'exists(); form input: ' + text );
+    log( 'exists(); form input: ' + text );
 
     // if this happens, then the validation prior to calling this function
     // did not catch everything. This should basically never happen
     if ( isNullOrEmptySpace( text ) === true ) {
-       window.console.log( 'exists(); the text from the current form is empty. ' +
+       log( 'exists(); the text from the current form is empty. ' +
        'this should almost never happen.' );
        return matches;
     }
@@ -286,7 +330,7 @@ function getObjectFailed( result ) {
 
     if ( isNullOrEmptySpace( menu.options ) === true ||
     menu.options.length === 0 ) {
-       window.console.log( 'exists(); no options in <select>' );
+       log( 'exists(); no options in <select>' );
        return matches;
     }
 
@@ -296,9 +340,9 @@ function getObjectFailed( result ) {
     var selectedId = menu.options[ menuIndex ].value;
     var count = menu.options.length;
 
-    window.console.log( 'exists(); selected index: ' + menuIndex );
-    window.console.log( 'exists(); selected id: ' + selectedId );
-    window.console.log( 'exists(); # of options: ' + count );
+    log( 'exists(); selected index: ' + menuIndex );
+    log( 'exists(); selected id: ' + selectedId );
+    log( 'exists(); # of options: ' + count );
 
 
     // loop through each <option> within the <select> and get the text
@@ -308,10 +352,10 @@ function getObjectFailed( result ) {
        var optionText = ( option.text + '' ).trim().toLowerCase();
        var optionIndex = option.index;
 
-       window.console.log( 'exists(); option text:  ' + optionText );
-       window.console.log( 'exists(); option index: ' + option.index );
-       window.console.log( 'exists(); text equal: ' + ( optionText === text ) );
-       window.console.log( 'exists(); indexes equal: ' + ( menuIndex === option.index ) );
+       log( 'exists(); option text:  ' + optionText );
+       log( 'exists(); option index: ' + option.index );
+       log( 'exists(); text equal: ' + ( optionText === text ) );
+       log( 'exists(); indexes equal: ' + ( menuIndex === option.index ) );
 
        // if the text is the same and the current option index equals
        // the index of the selected item (the one currently being edited / created )
@@ -319,7 +363,7 @@ function getObjectFailed( result ) {
        if ( isNullOrEmptySpace( menuIndex ) === false &&
        parseInt( menuIndex, 10 ) === option.index &&
        optionText === text ) {
-         window.console.log( 'exists(); editing existing record, no text change...' );
+         log( 'exists(); editing existing record, no text change...' );
          continue;
        }
 
@@ -328,11 +372,11 @@ function getObjectFailed( result ) {
        }
 
        // text matches
-       window.console.log( 'exists(); current text match: ' + optionText );
+       log( 'exists(); current text match: ' + optionText );
        matches.push( option.index );
     }
 
-    window.console.log( 'exists(); matched ids: ' + JSON.stringify( matches ) );
+    log( 'exists(); matched ids: ' + JSON.stringify( matches ) );
 
     // return an array containing any matches
     return matches;
@@ -353,6 +397,12 @@ function getObjectFailed( result ) {
     var button = document.getElementById( 'delete' );
     if ( button !== null ) {
       button.disabled = true;
+    }
+
+    // set the focus to the input to the first <input>
+    var inputs = document.getElementsByTagName('input');
+    if ( inputs !== null && inputs.lengths > 0 ) {
+        inputs[ 0 ].focus();
     }
   } );
 

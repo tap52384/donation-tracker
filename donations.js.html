@@ -155,8 +155,8 @@ function validateInput() {
      'want to add it?') :
      true;
      
-     window.console.log( 'validateInput(); error: ' + error);
-     window.console.log( 'validateInput(); okToAdd: ' + okToAdd);
+     log( 'validateInput(); error: ' + error);
+     log( 'validateInput(); okToAdd: ' + okToAdd);
      
      // return true if all required values are given and either the
      // data already exists, is brand new, or the user confirmed adding
@@ -176,7 +176,7 @@ function validateInput() {
   * . Gets the headers for the "donors" file and saves the data.
   */
   function prepareSaveData(headers) {
-    window.console.log('submit(donations); headers: ' + headers);
+    log('submit(donations); headers: ' + headers);
     
     // get all of the data on the page using the headers
     // this does not include the ID of this row and never will since
@@ -195,7 +195,7 @@ function validateInput() {
       data.phone = data.phone.replace(/\D/g,'');
     }
     
-    window.console.log('submit(donations); data: ' + JSON.stringify(data));
+    log('submit(donations); data: ' + JSON.stringify(data));
 
       // fix this function before you allow it to work
       // TODO: need to be able to chain the ability to add a new donor

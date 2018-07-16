@@ -19,7 +19,7 @@
   }
 
   function printResult() {
-    window.console.log('header for 800th column: ' + output);
+    log('header for 800th column: ' + output);
   }
 
   function saveResult(result) {
@@ -35,7 +35,7 @@
     // clear all fields
     clearAllFields();
 
-    window.console.log('save worked!');
+    log('save worked!');
 
     // reload the users menu
     google.script.run.withSuccessHandler(addUsersHtml)
@@ -49,7 +49,7 @@
   * . Gets the headers for the "donors" file and saves the data.
   */
   function prepareSaveData(headers) {
-    window.console.log('submit(donors); headers: ' + headers);
+    log('submit(donors); headers: ' + headers);
 
     // get all of the data on the page using the headers
     var data = collect(headers);
@@ -64,7 +64,7 @@
       data.phone = data.phone.replace(/\D/g,'');
     }
 
-    window.console.log('submit(donors); data: ' + JSON.stringify(data));
+    log('submit(donors); data: ' + JSON.stringify(data));
 
     google.script.run.withSuccessHandler(saveResult)
     .withFailureHandler(hideSpinner)
@@ -130,8 +130,8 @@
      'want to add them?') :
      true;
 
-     window.console.log( 'validateInput(); error: ' + error);
-     window.console.log( 'validateInput(); okToAdd: ' + okToAdd);
+     log( 'validateInput(); error: ' + error);
+     log( 'validateInput(); okToAdd: ' + okToAdd);
 
      // return true if all required values are given and either the
      // data already exists, is brand new, or the user confirmed adding
@@ -157,7 +157,7 @@
      // clear all fields
      clearAllFields();
 
-     window.console.log('#users (change): about to get donor object #' + userId);
+     log('#users (change): about to get donor object #' + userId);
 
      // asynchronously get the user details and fill the <select> menu
      google.script.run.withSuccessHandler(fillDetails)
@@ -170,7 +170,7 @@
 
       // validate the form input
       if (validateInput() === false) {
-        window.console.log( 'submit(); validate input failed.' );
+        log( 'submit(); validate input failed.' );
         return false;
       }
 
@@ -213,5 +213,5 @@
   google.script.run.withSuccessHandler(addUsersHtml)
   .fillUsersPicker();
 
-window.console.log('donors code completed.');
+log('donors code completed.');
 </script>
