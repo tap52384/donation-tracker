@@ -1,1 +1,14 @@
+node_modules
+node_modules/**
+**/node_modules/**
+node_modules/**.*
+node_modules/**/**.*
 README.md
+package.json
+package-lock.json
+.gitignore
+**/*.test.js
+**/*.keep
+**/.*
+node_modules/**/**/*.xml
+node_modules/**/**/**/*.xml

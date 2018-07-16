@@ -14,10 +14,30 @@ projects locally.
 the `clasp` tool locally as `.js`
 -   use `clasp version` just like `git commit -am` to commit code to google apps
 script; essentially, versions are equivalent to git commits
+-   The `.claspignore` file works kind of like .gitignore but uses the
+[AnyMatch](https://github.com/micromatch/anymatch) library for parsing. Note
+that you may have to change the root folder and then include everything within
+that folder since the parsing seems to be inconsistent.
+-   You can use `clasp status` to verify what files will be pushed to Google
+Apps Script before actually calling the `clasp push` command.
+
+## Jest
+A Javascript testing network. Add tests to make sure every client-side
+javascript function is testable. You may need to see if it's possible to move
+the client-side code to its own file and then include it in the HTML files so
+that they can be testable.
+
+[Jest](https://jestjs.io/en/)
 
 
 
 ## TODO
+-   See whether or not the `module.exports` call required by the Jest testing
+framework causes issues with Google Apps Script functioning properly.
+-   Use a custom root folder so that `.claspignore` can include all necessary
+code and exclude `node_modules` which is needed for the Jest framework.
+-   Add a check on the "donations" page when clicking "add a new" button if
+any data has been entered/selected to warn that they will lose their unsaved changes
 -   for "simple" object types (everything but actual donations), there is no
 need to retrieve the value from the spreadsheet. You can add an attribute with
 the case-sensitive value in it to load when selected; this will make the UI
@@ -26,7 +46,6 @@ work a bit faster. This should be done once everything is working properly
 this must be optimized if it is to be used in production
 -   Change workflow to commit to git before syncing to Google
 -   Add tests that prevent committing non-working/invalid code
--   Try Jest for Javascript testing
 -   Change the root folder where data is stored to "add-ons" from "apps"
 -   Make sure the file for saving donations exists and if not, create it upon
 saving a donation

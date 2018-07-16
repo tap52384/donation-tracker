@@ -1,0 +1,25 @@
+{
+  "name": "donation-tracker",
+  "version": "1.0.0",
+  "description": "Google Docs addon for tracking donations",
+  "main": "Code.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tap52384/donation-tracker.git"
+  },
+  "keywords": [
+    "donation"
+  ],
+  "author": "Z. Patrick Lewis",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tap52384/donation-tracker/issues"
+  },
+  "homepage": "https://github.com/tap52384/donation-tracker#readme",
+  "devDependencies": {
+    "jest": "^23.4.1"
+  }
+}
