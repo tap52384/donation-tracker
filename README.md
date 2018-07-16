@@ -30,6 +30,12 @@ this must be optimized if it is to be used in production
 -   Change the root folder where data is stored to "add-ons" from "apps"
 -   Make sure the file for saving donations exists and if not, create it upon
 saving a donation
+-   make sure that the suffix is checked for duplicate donors
+-   make sure that the suffix is displayed when listing donors on donations and donors dialogs
+-   when viewing all donations given, automatically load all donations for all
+donors for the last seven days
+-   when editing donations, allow changing amount, method, donation type, and name
+-   do not refresh the page upon editing a donation unless it was deleted
 -   Add ability to view/delete a user’s donations for a time range
 -   Add ability to summarize all donations by any number of users for a given
 time range; the ability to select multiple users will cover couples giving

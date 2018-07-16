@@ -24,7 +24,7 @@
 
   function saveResult(result) {
     if (result === false) {
-      window.console.error('save failed.');
+      log('donors(); save failed.', true);
 
       // stop the spinner
       hideSpinner();
@@ -35,7 +35,7 @@
     // clear all fields
     clearAllFields();
 
-    log('save worked!');
+    log('donors(); save worked!');
 
     // reload the users menu
     google.script.run.withSuccessHandler(addUsersHtml)

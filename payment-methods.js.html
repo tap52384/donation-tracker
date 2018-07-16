@@ -61,7 +61,7 @@ function validateInput() {
 
 function saveResult(result) {
     if (result === false) {
-      window.console.error('save failed.');
+      log('payment-methods(); save failed.', true);
 
       // stop the spinner
       hideSpinner();
@@ -73,7 +73,7 @@ function saveResult(result) {
     // clear all fields
     clearAllFields();
 
-    log('save worked!');
+    log('payment-methods(); save worked!');
 
     // reload the payment-methods menu
     google.script.run.withSuccessHandler(addPaymentMethodsHtml)

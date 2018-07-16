@@ -322,7 +322,8 @@ function getObjectFailed( result ) {
     var menu = document.getElementById( select );
 
     if ( menu === null ) {
-       window.console.error( 'exists(); could not find select' );
+       log( 'exists(); could not find <select> element with ID "' + select +
+       '"', true );
        return false;
     }
 
@@ -330,7 +331,7 @@ function getObjectFailed( result ) {
 
     if ( isNullOrEmptySpace( menu.options ) === true ||
     menu.options.length === 0 ) {
-       log( 'exists(); no options in <select>' );
+       log( 'exists(); no options in <select> element with ID "' + select + '"' );
        return matches;
     }
 

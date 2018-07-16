@@ -75,8 +75,15 @@ function getObject( filename, rowId ) {
   return object;
 }
 
+/**
+ * Returns true if the specified header name ends in "_AT," which indicates
+ * it is a date column.
+ * @param  {[type]}  header [description]
+ * @return {Boolean}        [description]
+ */
 function isDateColumn( header ) {
-   return isNullOrEmptySpace( header ) === false && header.endsWith( '_AT' ) === true;
+   return isNullOrEmptySpace( header ) === false &&
+   header.endsWith( '_AT' ) === true;
 }
 
 /**
@@ -111,11 +118,18 @@ function getObject2( filename, rowId ) {
   return {};
 }
 
+/**
+ * Returns the data range for the specified file, skipping the first row which
+ * contains the row headers.
+ * @param  {[type]} filename [description]
+ * @return {[type]}          [description]
+ */
 function getActualDataRange( filename ) {
    var spreadsheet = getFileByFilename( filename );
 
   if ( spreadsheet === null ) {
-     log( 'getActualDataRange(); the spreadsheet ' + filename + ' was not found or loaded...' );
+     log( 'getActualDataRange(); the spreadsheet ' + filename +
+     ' was not found or loaded...' );
      return null;
   }
 
@@ -218,13 +232,12 @@ function createFile( folder, filename ) {
   var spreadsheet = SpreadsheetApp.create( filename );
 
   // use the ID of the spreadsheet in order to move it to the
-  // app folder
+  // specified folder
   var fileId = spreadsheet.getId();
   var file = DriveApp.getFileById( fileId );
 
-  // change the parent folder of the file (apparently a file can
-  // have multiple parents) by adding the file to the app
-  // folder and removing it from root
+  // change the parent folder of the file (apparently a file can have multiple
+  // parents) by adding the file to the app folder and removing it from root
   folder.addFile( file );
   DriveApp.getRootFolder().removeFile( file );
 
@@ -393,10 +406,12 @@ function setEmailFmt( sheet, header, columnLetter ) {
 }
 
 /**
-* . Adds the column headers to the spreadsheet needed for storing data.
-* . @param  Spreadsheet spreadsheet The spreadsheet to add the header row to.
-* . @param  array       headers     The headers to add to the Spreadsheet.
-* . @return Spreadsheet
+* Adds the column headers to the spreadsheet needed for storing data. This
+* function also adds restrictions to columns based on data type (date, number,
+* etc).
+* @param  Spreadsheet spreadsheet The spreadsheet to add the header row to.
+* @param  array       headers     The headers to add to the Spreadsheet.
+* @return Spreadsheet
 */
 function initializeFile( spreadsheet, headers ) {
   if ( spreadsheet === null ) {
@@ -505,20 +520,22 @@ function getAppFolder() {
   var appFolderName = PropertiesService.getScriptProperties()
   .getProperty( 'appFolderName' );
 
+  var addonsRootFolderName = PropertiesService.getScriptProperties()
+  .getProperty( 'addonsRootFolderName' );
+
   // stop here if the string is null or empty space
-  if ( isNullOrEmptySpace( appFolderName ) === true ) {
-     log( 'getAppFolder(); could not retrieve the folder name for this add-on from the PropertiesService.' );
+  if ( isNullOrEmptySpace( appFolderName ) === true ||
+  isNullOrEmptySpace( addonsRootFolderName ) === true ) {
+     log( 'getAppFolder(); could not retrieve the folder name for this ' +
+     'add-on from the PropertiesService.' );
      return null;
   }
 
-  // "apps" folder within root Google Drive folder
-  var appsRoot = 'apps';
-
-  // create the apps folder
-  var rootAppsFolder = dirGetOrCreate( root, appsRoot );
+  // create the add-ons folder
+  var rootAddonsFolder = dirGetOrCreate( root, addonsRootFolderName );
 
   // create the apps/donation-tracker folder
-  var donationTrackerFolder = dirGetOrCreate( rootAppsFolder, appFolderName );
+  var donationTrackerFolder = dirGetOrCreate( rootAddonsFolder, appFolderName );
 
   // return the Folder object
   return donationTrackerFolder;
@@ -619,7 +636,7 @@ function saveData( filename, rowId, data ) {
   // set the id in the data
   data.ID = rowId;
 
-  // set the updated_at date
+  // set the updated_at date to the current date
   data.UPDATED_AT = new Date();
 
   // 3. Get headers for this filename
@@ -666,6 +683,11 @@ function saveData( filename, rowId, data ) {
   return true;
 }
 
+/**
+ * Returns a string only containing digits.
+ * @param  {string} value [description]
+ * @return {string}       [description]
+ */
 function cleanPhoneNumber( value ) {
    return ( '' + value ).replace( /\D+/g, '' );
 }
