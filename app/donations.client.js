@@ -1,28 +1,25 @@
-<!-- client-size (browser) javascript -->
-<!-- use google.script.run to call server-side functions -->
-<script>
-
-
 /**
  * Resets all fields on the form.
  * @return {[type]} [description]
  */
 function clearAllFields() {
+
     // clear the fields
-     document.getElementById('amount').value =
-     document.getElementById('donor_id').value =
+     document.getElementById( 'amount' ).value =
+     document.getElementById( 'donor_id' ).value =
+
      // document.getElementById('firstname').value =
      // document.getElementById('lastname').value =
      // document.getElementById('mi').value =
      // document.getElementById('suffix').value =
-     document.getElementById('donationtype_id').value =
-     document.getElementById('paymentmethod_id').value = '';
+     document.getElementById( 'donationtype_id' ).value =
+     document.getElementById( 'paymentmethod_id' ).value = '';
 
      // hide the fields for adding a new donor on the fly
      // document.getElementById('new-donor-info').style.display = 'none';
 
      // check the "now" date
-     document.getElementById('date-given-now').checked = true;
+     document.getElementById( 'date-given-now' ).checked = true;
 
      // set the default date for the donation to the current state
      resetGivenDate();
@@ -32,18 +29,20 @@ function clearAllFields() {
 *  set the default date for the donation to the current date
 */
 function resetGivenDate() {
+
      // https://stackoverflow.com/a/19079425/1620794
      // https://stackoverflow.com/questions/12409299/how-to-get-current-formatted-date-dd-mm-yyyy-in-javascript-and-append-it-to-an-i/19079425#comment74271020_19079425
-     document.getElementById('given_at').value =
-     new Date().toJSON().slice(0,10).replace(/-/g,'-');
+     document.getElementById( 'given_at' ).value =
+     new Date().toJSON().slice( 0, 10 ).replace( /-/g, '-' );
      return true;
 }
 
-function addDonorsHtml(output) {
+function addDonorsHtml( output ) {
+
     // add an option for manually entering the name of a new donor on the fly
     // output = '<option value="-1">Add new donor</option>' + output;
 
-    document.getElementById('donor_id').innerHTML = output;
+    document.getElementById( 'donor_id' ).innerHTML = output;
 
     // clear the fields first
     clearAllFields();
@@ -52,8 +51,8 @@ function addDonorsHtml(output) {
     hideSpinner();
 }
 
-function addPaymentMethodsHtml(output) {
-    document.getElementById('paymentmethod_id').innerHTML = output;
+function addPaymentMethodsHtml( output ) {
+    document.getElementById( 'paymentmethod_id' ).innerHTML = output;
 
     // clear the fields first
     clearAllFields();
@@ -75,7 +74,8 @@ function addDonationTypesHtml( output ) {
 /**
 * Shows the UI for adding a new donor on the fly if selected.
 */
-document.getElementById('donor_id').onchange = function( event ) {
+document.getElementById( 'donor_id' ).onchange = function( event ) {
+
      // var donorId = event.target.value;
 
      // var show = event.target.value === '-1';
@@ -92,7 +92,7 @@ document.getElementById('donor_id').onchange = function( event ) {
 /**
 * Shows the UI for quickly adding a donor that does not exist in the list.
 */
-document.getElementById('add-donor').onclick = function( event ) {
+document.getElementById( 'add-donor' ).onclick = function( event ) {
 
   // opens the window for adding a donor
   // this is called first because once the dialog is closed,
@@ -122,7 +122,8 @@ document.getElementById('add-donor').onclick = function( event ) {
   // }
 };
 
-document.getElementById('add-payment-method').onclick = function( event ) {
+document.getElementById( 'add-payment-method' ).onclick = function( event ) {
+
     // opens the window for adding a payment method
     // this is called first because once the dialog is closed,
     // google.script is not available. This is called asynchronously so there
@@ -135,7 +136,8 @@ document.getElementById('add-payment-method').onclick = function( event ) {
     google.script.host.close();
 };
 
-document.getElementById('add-donation-type').onclick = function( event ) {
+document.getElementById( 'add-donation-type' ).onclick = function( event ) {
+
     // opens the window for adding a payment method
     // this is called first because once the dialog is closed,
     // google.script is not available. This is called asynchronously so there
@@ -149,12 +151,11 @@ document.getElementById('add-donation-type').onclick = function( event ) {
 };
 
 
-
 function validateInput() {
      var error = '';
 
-     var amount = getValue('amount');
-     var donor = getValue('donor_id');
+     var amount = getValue( 'amount' );
+     var donor = getValue( 'donor_id' );
 
      // var firstname = getValue('firstname');
      // var mi = getValue('mi');
@@ -163,9 +164,9 @@ function validateInput() {
      // var fullName = firstname + ' ' + lastname +
      // ' ' + suffix;
 
-     var paymentMethod = getValue('paymentmethod_id');
-     var donationType = getValue('donationtype_id');
-     var givenDate = getValue('given_at');
+     var paymentMethod = getValue( 'paymentmethod_id' );
+     var donationType = getValue( 'donationtype_id' );
+     var givenDate = getValue( 'given_at' );
 
      // for duplicate entry detection when adding a new donor
      // var displayInputs = ['firstname', 'lastname', 'suffix'];
@@ -204,19 +205,20 @@ function validateInput() {
      // ' do you still want to add it?') :
      // true;
 
-     log( 'validateInput(); error: ' + error);
+     log( 'validateInput(); error: ' + error );
+
      // log( 'validateInput(); okToAdd: ' + okToAdd);
 
      // return true if all required values are given and either the
      // data already exists, is brand new, or the user confirmed adding
      // a duplicate
-     if (isNullOrEmptySpace(error) === true) {
+     if ( isNullOrEmptySpace( error ) === true ) {
         return true;
      }
 
      // show an error if one is generated (not needed for exists since a confirm() is used already)
-     if (isNullOrEmptySpace(error) === false) {
-        alert(error);
+     if ( isNullOrEmptySpace( error ) === false ) {
+        alert( error );
      }
      return false;
 }
@@ -224,31 +226,31 @@ function validateInput() {
 /**
   * . Gets the headers for the "donors" file and saves the data.
   */
-  function prepareSaveData(headers) {
-    log('submit(donations); headers: ' + headers);
+  function prepareSaveData( headers ) {
+    log( 'submit(donations); headers: ' + headers );
 
     // get all of the data on the page using the headers
     // this does not include the ID of this row and never will since
     // this form is used for creation
-    var data = collect(headers);
+    var data = collect( headers );
 
     // every new donation will have a new ID
 
-    log('submit(donations); data: ' + JSON.stringify(data));
+    log( 'submit(donations); data: ' + JSON.stringify( data ) );
 
       // fix this function before you allow it to work
       // TODO: need to be able to chain the ability to add a new donor
       // along with adding the actual donation
       // then, the donor_id needs to be set to the new donor id that is returned
       // and then the donation needs to be saved correctly
-     google.script.run.withSuccessHandler(saveResult)
-     .withFailureHandler(hideSpinner)
-     .saveData('donations', null, data);
+     google.script.run.withSuccessHandler( saveResult )
+     .withFailureHandler( hideSpinner )
+     .saveData( 'donations', null, data );
   }
 
-  function saveResult(result) {
-      if (result === false) {
-        log('donations(); save failed.', true);
+  function saveResult( result ) {
+      if ( result === false ) {
+        log( 'donations(); save failed.', true );
 
         // stop the spinner
         hideSpinner();
@@ -260,7 +262,7 @@ function validateInput() {
       // clear all fields
       clearAllFields();
 
-      log('donations(); save worked!');
+      log( 'donations(); save worked!' );
 
       // stop the spinner
       hideSpinner();
@@ -272,12 +274,12 @@ function validateInput() {
 /**
 * . Handles when the form is submitted.
 */
-document.getElementById('manage-donations-form')
-.addEventListener('submit', function( event ) {
+document.getElementById( 'manage-donations-form' )
+.addEventListener( 'submit', function( event ) {
       event.preventDefault();
 
       // validate the form input
-      if (validateInput() === false) {
+      if ( validateInput() === false ) {
         return false;
       }
 
@@ -285,36 +287,34 @@ document.getElementById('manage-donations-form')
       showSpinner();
 
       // get all headers which will also be the IDs of all inputs
-      google.script.run.withSuccessHandler(prepareSaveData)
-      .getHeaders('donations');
-});
+      google.script.run.withSuccessHandler( prepareSaveData )
+      .getHeaders( 'donations' );
+} );
 
-document.getElementById('date-given-now')
-.addEventListener('click', function( event ) {
+document.getElementById( 'date-given-now' )
+.addEventListener( 'click', function( event ) {
    resetGivenDate();
-});
+} );
 
 /**
 * Handles resetting the form.
 */
-document.getElementById('reset').addEventListener('click', function( event ) {
+document.getElementById( 'reset' ).addEventListener( 'click', function( event ) {
 
     clearAllFields();
-});
+} );
 
 /**
 * Code run to load the donors
 */
-google.script.run.withSuccessHandler(addDonorsHtml)
+google.script.run.withSuccessHandler( addDonorsHtml )
 .fillUsersPicker();
 
-google.script.run.withSuccessHandler(addPaymentMethodsHtml)
+google.script.run.withSuccessHandler( addPaymentMethodsHtml )
 .fillPaymentMethodsPicker();
 
-google.script.run.withSuccessHandler(addDonationTypesHtml)
+google.script.run.withSuccessHandler( addDonationTypesHtml )
 .fillDonationTypesPicker();
 
 // set the current date for the date picker
 clearAllFields();
-
-</script>

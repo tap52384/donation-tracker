@@ -1,4 +1,23 @@
-/* global DriveApp, SpreadsheetApp */
+/* eslint-env browser */
+/* global SpreadsheetApp, ScriptApp, DriveApp, PropertiesService, Logger, HtmlService */
+
+/**
+ * This creates an object named "code" that will add all functions as properties
+ * (remember that functions are technically variables) that will be used for
+ * testing.
+ * @param  {[type]} module [description]
+ * @return {[type]}        [description]
+ */
+if ( module && module.exports ) {
+    var code = {};
+    code.isNullOrEmpty = isNullOrEmpty;
+    code.isNullOrEmptySpace = isNullOrEmptySpace;
+    code.isDateColumn = isDateColumn;
+    code.titleCase = titleCase;
+
+    // exposes the code so that Jest can test it
+    module.exports = code;
+}
 
 /**
 * . Returns a single row of data as an associative array of values
@@ -572,6 +591,19 @@ function isEmptyObject( obj ) {
         return true;
     }
 
+    // ECMAScript5 method of counting properties
+    if ( Object && hasProperty( Object, 'getOwnPropertyNames' ) ) {
+        var length = Object.getOwnPropertyNames( obj ).length;
+        log( 'isEmptyObject(): getOwnPropertyNames revealed ' +
+        length + ' properties in this object.' );
+        return Object.getOwnPropertyNames( obj ).length === 0;
+    }
+
+    if ( obj.length && obj.length > 0 ) {
+        log( 'isEmptyObject(): object has a length property greater than 0' );
+        return false;
+    }
+
     for ( var key in obj ) {
         if ( obj[ key ] !== null ) {
             log( 'isEmptyObject(): hasOwnProperty found at least one property.' );
@@ -583,6 +615,24 @@ function isEmptyObject( obj ) {
     log( 'isEmptyObject(): failed to prove at least one property exists.' );
     return true;
 };
+
+/**
+ * Returns true if the specified variable is null, undefined, or an empty string.
+ * @param  {[type]}  x [description]
+ * @return {Boolean}   [description]
+ */
+function isNullOrEmpty( x ) {
+    return x === undefined || x === '' || x === null;
+}
+
+/**
+* Returns true if the specified variable is null, empty, or with all spaces
+* removed an empty string.
+*/
+function isNullOrEmptySpace( x ) {
+    return isNullOrEmpty( x ) || typeof x.trim === 'function' &&
+    isNullOrEmpty( x.trim().replace( / /g, '' ) );
+}
 
 /**
 * . Saves the specified data. If no rowId is specified,
@@ -873,4 +923,30 @@ function getValidOrder( direction ) {
     }
 
     return 'ascending';
+}
+
+/**
+* Changes a string to title case.
+* @returns string
+* @link https://gist.github.com/SonyaMoisset/b2606b3a7048cc5303f64a726a39e5fd#file-title-case-a-sentence-with-map-wc-js
+*/
+function titleCase( str ) {
+  return str.toLowerCase().split( ' ' ).map( function( word ) {
+    return ( word.charAt( 0 ).toUpperCase() + word.slice( 1 ) );
+  } ).join( ' ' );
+}
+
+/**
+ * Logs the text hopefully to the browser console and Google Apps Script logging.
+ * @param  {[type]} text  [description]
+ * @param  {[type]} error [description]
+ * @return {[type]}       [description]
+ */
+function log( text, error ) {
+    Logger.log( text );
+    console.log( text );
+    if ( error === true ) {
+       SpreadsheetApp.getUi().alert( text );
+    }
+    return error === true;
 }

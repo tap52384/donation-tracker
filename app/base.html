@@ -46,10 +46,14 @@
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.21.0/moment.min.js"></script>
 
   <!-- javascript common to all pages -->
-  <?!= include('common.js'); ?>
+  <!-- client-size (browser) javascript common to all pages -->
+  <!-- use google.script.run to call server-side functions -->
+  <?!= include('common.client.js'); ?>
 
   <!-- page specific javascript -->
-  <?!= include(data.js); ?>
+  <?!= isNullOrEmptySpace(data.js) === true ?
+  '' :
+  ( '<script>' + include(data.js) + '</script>' ); ?>
 
   </body>
 </html>

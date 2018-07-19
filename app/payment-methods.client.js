@@ -1,16 +1,13 @@
-<!-- client-size (browser) javascript -->
-<!-- use google.script.run to call server-side functions -->
-<script>
-
 function clearAllFields() {
+
     // clear the fields
     document.getElementById( 'name' ).value = '';
     document.getElementById( 'delete' ).disabled = true;
 }
 
-function addPaymentMethodsHtml(output) {
+function addPaymentMethodsHtml( output ) {
     log( 'addPaymentMethodsHtml(); about to set <select> innerHTML...' );
-    document.getElementById('payment-methods').innerHTML = output;
+    document.getElementById( 'payment-methods' ).innerHTML = output;
 
     // clear the fields first
     clearAllFields();
@@ -22,9 +19,9 @@ function addPaymentMethodsHtml(output) {
 function validateInput() {
      var error = '';
 
-     var name = getValue('name');
-     var displayInputs = ['name'];
-     var possibleDupeIds = exists(displayInputs, 'payment-methods');
+     var name = getValue( 'name' );
+     var displayInputs = [ 'name' ];
+     var possibleDupeIds = exists( displayInputs, 'payment-methods' );
 
      // name of payment method must be at least two characters
      if ( name.trim().length < 2 ) {
@@ -38,30 +35,30 @@ function validateInput() {
      if the count of the matches > 0, then present the confirm() dialog and only continue if positive
      */
      var okToAdd = possibleDupeIds.length > 0 ?
-     window.confirm('A payment method with the name "' + fullName + '" already exists; do you still ' +
-     'want to add it?') :
+     window.confirm( 'A payment method with the name "' + fullName + '" already exists; do you still ' +
+     'want to add it?' ) :
      true;
 
-     log( 'validateInput(); error: ' + error);
-     log( 'validateInput(); okToAdd: ' + okToAdd);
+     log( 'validateInput(); error: ' + error );
+     log( 'validateInput(); okToAdd: ' + okToAdd );
 
      // return true if all required values are given and either the
      // data already exists, is brand new, or the user confirmed adding
      // a duplicate
-     if (isNullOrEmptySpace(error) === true && okToAdd === true) {
+     if ( isNullOrEmptySpace( error ) === true && okToAdd === true ) {
        return true;
      }
 
      // show an error if one is generated (not needed for exists since a confirm() is used already)
-     if (isNullOrEmptySpace(error) === false) {
-       alert(error);
+     if ( isNullOrEmptySpace( error ) === false ) {
+       alert( error );
      }
      return false;
 }
 
-function saveResult(result) {
-    if (result === false) {
-      log('payment-methods(); save failed.', true);
+function saveResult( result ) {
+    if ( result === false ) {
+      log( 'payment-methods(); save failed.', true );
 
       // stop the spinner
       hideSpinner();
@@ -73,10 +70,10 @@ function saveResult(result) {
     // clear all fields
     clearAllFields();
 
-    log('payment-methods(); save worked!');
+    log( 'payment-methods(); save worked!' );
 
     // reload the payment-methods menu
-    google.script.run.withSuccessHandler(addPaymentMethodsHtml)
+    google.script.run.withSuccessHandler( addPaymentMethodsHtml )
     .fillPaymentMethodsPicker();
 
     // document.getElementById('manage-donors-form').reset();
@@ -86,31 +83,31 @@ function saveResult(result) {
   /**
   * . Gets the headers for the "donors" file and saves the data.
   */
-  function prepareSaveData(headers) {
-    log('submit(payment-methods); headers: ' + headers);
+  function prepareSaveData( headers ) {
+    log( 'submit(payment-methods); headers: ' + headers );
 
     // get all of the data on the page using the headers
-    var data = collect(headers);
+    var data = collect( headers );
 
     // add the id to the data
-    var userId = getValue('payment-methods');
-    data['ID'] = userId;
+    var userId = getValue( 'payment-methods' );
+    data.ID = userId;
 
-    log('submit(payment-methods); data: ' + JSON.stringify(data));
+    log( 'submit(payment-methods); data: ' + JSON.stringify( data ) );
 
-    google.script.run.withSuccessHandler(saveResult)
-    .withFailureHandler(hideSpinner)
-    .saveData('payment-methods', userId, data);
+    google.script.run.withSuccessHandler( saveResult )
+    .withFailureHandler( hideSpinner )
+    .saveData( 'payment-methods', userId, data );
 }
 
 /**
 * . Handles when the form is submitted.
 */
-document.getElementById('manage-payment-methods-form').addEventListener('submit', function( event ) {
+document.getElementById( 'manage-payment-methods-form' ).addEventListener( 'submit', function( event ) {
       event.preventDefault();
 
       // validate the form input
-      if (validateInput() === false) {
+      if ( validateInput() === false ) {
         return false;
       }
 
@@ -118,14 +115,14 @@ document.getElementById('manage-payment-methods-form').addEventListener('submit'
       showSpinner();
 
       // get all headers which will also be the IDs of all inputs
-      google.script.run.withSuccessHandler(prepareSaveData)
-      .getHeaders('payment-methods');
-  });
+      google.script.run.withSuccessHandler( prepareSaveData )
+      .getHeaders( 'payment-methods' );
+  } );
 
 /**
 * . Handles when the <select> for payment methods is changed.
 */
-document.getElementById('payment-methods').onchange = function( event ) {
+document.getElementById( 'payment-methods' ).onchange = function( event ) {
      var userId = event.target.value;
 
      // show the spinner
@@ -134,40 +131,40 @@ document.getElementById('payment-methods').onchange = function( event ) {
      // clear all fields
      clearAllFields();
 
-     log('#payment-methods (change): about to get payment-methods object #' + userId);
+     log( '#payment-methods (change): about to get payment-methods object #' + userId );
 
      // asynchronously get the user details and fill the <select> menu
-     google.script.run.withSuccessHandler(fillDetails)
-     .withFailureHandler(getObjectFailed)
-     .getObject('payment-methods', userId);
+     google.script.run.withSuccessHandler( fillDetails )
+     .withFailureHandler( getObjectFailed )
+     .getObject( 'payment-methods', userId );
 };
 
-document.getElementById('delete').addEventListener('click', function( event ) {
-      // get the current user id
-      var userId = getValue('payment-methods');
+document.getElementById( 'delete' ).addEventListener( 'click', function( event ) {
 
-      if (isNullOrEmptySpace( userId ) === true) {
+      // get the current user id
+      var userId = getValue( 'payment-methods' );
+
+      if ( isNullOrEmptySpace( userId ) === true ) {
         return false;
       }
 
       // only proceed once you have confirmation
-      if (confirm( 'Are you sure you want to delete this payment method?') === true) {
+      if ( confirm( 'Are you sure you want to delete this payment method?' ) === true ) {
+
         // show the spinner
         showSpinner();
 
         // disable the delete button
-        disable('delete');
+        disable( 'delete' );
 
         // delete the data for the current user
-        google.script.run.withSuccessHandler(saveResult)
-        .deleteData('payment-methods', userId);
+        google.script.run.withSuccessHandler( saveResult )
+        .deleteData( 'payment-methods', userId );
       }
   } );
 
 /**
 * . Code that loads on page load
 */
-google.script.run.withSuccessHandler(addPaymentMethodsHtml)
+google.script.run.withSuccessHandler( addPaymentMethodsHtml )
 .fillPaymentMethodsPicker();
-
-</script>

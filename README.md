@@ -1,6 +1,7 @@
 # donation-tracker
 
-uses google sheets to track donations and generate reports
+Uses google sheets to track donations and generate reports. Note that Google
+Apps Script is using TypeScript which is a superset of JavaScript.
 
 ## Clasp
 The Apps Script CLI is a tool that lets you create, edit, and deploy Apps Script
@@ -32,6 +33,7 @@ that they can be testable.
 
 
 ## TODO
+-   Remove the dependency on moment.js
 -   See whether or not the `module.exports` call required by the Jest testing
 framework causes issues with Google Apps Script functioning properly.
 -   Use a custom root folder so that `.claspignore` can include all necessary

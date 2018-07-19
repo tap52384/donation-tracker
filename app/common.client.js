@@ -1,6 +1,3 @@
-<!-- client-size (browser) javascript common to all pages -->
-<!-- use google.script.run to call server-side functions -->
-<script>
 /**
 * . Returns true if the specified variable is null,
 * . empty, or undefined.
@@ -401,10 +398,8 @@ function getObjectFailed( result ) {
     }
 
     // set the focus to the input to the first <input>
-    var inputs = document.getElementsByTagName('input');
+    var inputs = document.getElementsByTagName( 'input' );
     if ( inputs !== null && inputs.lengths > 0 ) {
         inputs[ 0 ].focus();
     }
   } );
-
-</script>

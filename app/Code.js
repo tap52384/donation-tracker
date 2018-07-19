@@ -1,3 +1,6 @@
+/* eslint-env browser */
+/* global SpreadsheetApp, ScriptApp, PropertiesService, Logger, HtmlService */
+
 /**
 * . Code that handles menus and add-on installation.
 *
@@ -35,40 +38,43 @@
  *     determine which authorization mode (ScriptApp.AuthMode) the trigger is
  *     running in, inspect e.authMode.
  */
-function onOpen(e) {
+function onOpen( e ) {
   var menu = SpreadsheetApp.getUi().createAddonMenu(); // Or DocumentApp.
-  if (e && e.authMode == ScriptApp.AuthMode.NONE) {
+  if ( e && e.authMode === ScriptApp.AuthMode.NONE ) {
+
     // Add a normal menu item (works in all authorization modes).
-    menu.addItem('Manage donors', 'manageDonors');
+    menu.addItem( 'Manage donors', 'manageDonors' );
   }
+
     // Add a menu item based on properties (doesn't work in AuthMode.NONE).
     // https://developers.google.com/apps-script/guides/properties
     var properties = PropertiesService.getDocumentProperties();
-    var workflowStarted = properties.getProperty('workflowStarted');
-    if (workflowStarted) {
-      menu.addItem('Check workflow status', 'checkWorkflow');
+    var workflowStarted = properties.getProperty( 'workflowStarted' );
+    if ( workflowStarted ) {
+      menu.addItem( 'Check workflow status', 'checkWorkflow' );
     } else {
-      menu.addItem('Start workflow', 'manageDonors');
+      menu.addItem( 'Start workflow', 'manageDonors' );
     }
   menu.addToUi();
 
   var ui = SpreadsheetApp.getUi();
+
   // Or DocumentApp or FormApp.
 
   // shows one way that a custom menu can be added
-  ui.createMenu('Donation Tracker')
-      .addItem('Manage members...', 'manageDonors')
+  ui.createMenu( 'Donation Tracker' )
+      .addItem( 'Manage members...', 'manageDonors' )
       .addToUi();
 
     // shows a second way that a custom menu can be added
     var spreadsheet = SpreadsheetApp.getActive();
     var menuItems = [
-      {name: 'Add donations...', functionName: 'manageDonations'},
-      {name: 'Manage donation types...', functionName: 'manageDonationTypes'},
-      {name: 'Manage donors...', functionName: 'manageDonors'},
-      {name: 'Manage payment methods...', functionName: 'managePaymentMethods'}
+      { name: 'Add donations...', functionName: 'manageDonations' },
+      { name: 'Manage donation types...', functionName: 'manageDonationTypes' },
+      { name: 'Manage donors...', functionName: 'manageDonors' },
+      { name: 'Manage payment methods...', functionName: 'managePaymentMethods' }
     ];
-    spreadsheet.addMenu('Donation Tracker', menuItems);
+    spreadsheet.addMenu( 'Donation Tracker', menuItems );
 }
 
 /**
@@ -82,60 +88,52 @@ function onOpen(e) {
  *     run in AuthMode.FULL, but onOpen triggers may be AuthMode.LIMITED or
  *     AuthMode.NONE.)
  */
-function onInstall(e) {
-  onOpen(e);
-}
-
-function isNullOrEmpty( x ) {
-    return x === undefined || x === '' || x === null;
-}
-
-/**
-* Returns true if the specified variable is null, empty, or with all spaces
-* removed an empty string.
-*/
-function isNullOrEmptySpace( x ) {
-  return isNullOrEmpty( x ) || typeof x.trim === 'function' && isNullOrEmpty( x.trim().replace( / /g, '' ) );
+function onInstall( e ) {
+    onOpen( e );
 }
 
 function manageDonors() {
+
    // type HtmlOutput
-   var html = extends('base', 'donors', 'customcss', 'donors.js');
+   var html = extendTemplate( 'base', 'donors', 'customcss', 'donors.js' );
 
    // Ui
    SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
    // showModalDialog(HtmlOutput, String)
-      .showModalDialog(html, 'Manage donors');
+      .showModalDialog( html, 'Manage donors' );
 }
 
 function manageDonations() {
+
   // HtmlOutput
-  var html = extends('base', 'donations', 'customcss', 'donations.js');
+  var html = extendTemplate( 'base', 'donations', 'customcss', 'donations.js' );
 
   // Ui
    SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
    // showModalDialog(HtmlOutput, String)
-      .showModalDialog(html, 'Add donations');
+      .showModalDialog( html, 'Add donations' );
 }
 
 function manageDonationTypes() {
+
   // HtmlOutput
-  var html = extends('base', 'donation-types', 'customcss', 'donation-types.js');
+  var html = extendTemplate( 'base', 'donation-types', 'customcss', 'donation-types.js' );
 
   // Ui
    SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
    // showModalDialog(HtmlOutput, String)
-      .showModalDialog(html, 'Manage donation types');
+      .showModalDialog( html, 'Manage donation types' );
 }
 
 function managePaymentMethods() {
+
   // HtmlOutput
-  var html = extends('base', 'payment-methods', 'customcss', 'payment-methods.js');
+  var html = extendTemplate( 'base', 'payment-methods', 'customcss', 'payment-methods.js' );
 
   // Ui
    SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
    // showModalDialog(HtmlOutput, String)
-      .showModalDialog(html, 'Manage payment methods');
+      .showModalDialog( html, 'Manage payment methods' );
 }
 
 /**
@@ -145,8 +143,10 @@ function managePaymentMethods() {
  * . https://developers.google.com/apps-script/reference/html/html-output#getContent()
  * . @returns String
  */
-function include(filename) {
-  return isNullOrEmptySpace(filename) ? '' : HtmlService.createHtmlOutputFromFile(filename).getContent();
+function include( filename ) {
+    return isNullOrEmptySpace( filename ) ?
+    '' :
+    HtmlService.createHtmlOutputFromFile( filename ).getContent();
 }
 
 /**
@@ -162,10 +162,11 @@ function include(filename) {
 * . @param bootstrap       boolean
 * . @return HtmlOutput
 */
-function extends(layoutFileName, contentFileName, cssFileName, jsFileName, bootstrap) {
+function extendTemplate( layoutFileName, contentFileName, cssFileName, jsFileName, bootstrap ) {
+
   // https://developers.google.com/apps-script/reference/html/html-service#createTemplateFromFile(String)
   // returns HtmlTemplate
-  var template = HtmlService.createTemplateFromFile(layoutFileName);
+  var template = HtmlService.createTemplateFromFile( layoutFileName );
 
   // https://developers.google.com/apps-script/reference/html/html-template#evaluate()
   // Key sentence from the docs:
@@ -176,37 +177,18 @@ function extends(layoutFileName, contentFileName, cssFileName, jsFileName, boots
     js: jsFileName,
     useBootstrap: bootstrap === true
   };
+
   // evaluate() returns HtmlOutput
   return template.evaluate()
+
   // https://developers.google.com/apps-script/reference/html/html-output#addMetaTag(String,String)
-  .addMetaTag('apple-mobile-web-app-capable', 'yes')
+  .addMetaTag( 'apple-mobile-web-app-capable', 'yes' )
+
     // .addMetaTag('google-site-verification', '')
-    .addMetaTag('mobile-web-app-capable', 'yes')
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+    .addMetaTag( 'mobile-web-app-capable', 'yes' )
+    .addMetaTag( 'viewport', 'width=device-width, initial-scale=1' )
+
     // https://developers.google.com/apps-script/reference/html/html-output#setWidth(Integer)
-    .setWidth(500)
-    .setHeight(600);
-}
-
-/**
-* . Logs the text hopefully to the browser console and Google Apps Script logging.
-*/
-function log(text, error) {
-  Logger.log(text);
-  console.log(text);
-  if (error === true) {
-     SpreadsheetApp.getUi().alert(text);
-  }
-  return error === true;
-}
-
-/**
-* . Changes a string to title case.
-* . @returns string
-* . @link https://gist.github.com/SonyaMoisset/b2606b3a7048cc5303f64a726a39e5fd#file-title-case-a-sentence-with-map-wc-js
-*/
-function titleCase(str) {
-  return str.toLowerCase().split(' ').map(function(word) {
-    return (word.charAt(0).toUpperCase() + word.slice(1));
-  }).join(' ');
+    .setWidth( 500 )
+    .setHeight( 600 );
 }
