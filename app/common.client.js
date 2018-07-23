@@ -1,28 +1,46 @@
+if ( isBrowser() === true ) {
+
+;( function( code, $, window, document, google, moment, undefined ) {
+
+// This allows for javascript that should work pretty consistently across browsers and platforms.
+'use strict';
+
+// stop here if window or document are not available;
+if ( code.isNullOrEmpty( window ) === true ||
+code.isNullOrEmpty( document ) === true ) {
+    return;
+}
+
+// log that the file has been reached
+code.log( 'common.client.js loaded.' );
+
 /**
 * . Returns true if the specified variable is null,
 * . empty, or undefined.
 * . @return boolean
 */
-function isNullOrEmpty( x ) {
+code.isNullOrEmpty = function( x ) {
     return x === undefined || x === '' || x === null;
-}
+};
 
 /**
 * Returns true if the specified variable is null, empty, or with all spaces
 * removed an empty string.
 */
-function isNullOrEmptySpace( x ) {
-  return isNullOrEmpty( x ) || typeof x.trim === 'function' &&
-  isNullOrEmpty( x.trim().replace( / /g, '' ) );
-}
+code.isNullOrEmptySpace = function( x ) {
+  return code.isNullOrEmpty( x ) || typeof x.trim === 'function' &&
+  code.isNullOrEmpty( x.trim().replace( / /g, '' ) );
+};
 
-function getValue( id ) {
+code.getValue = function( id ) {
   var element = document.getElementById( id );
 
-  return element === null || isNullOrEmptySpace( element.value ) ? '' : element.value;
-}
+  return element === null || code.isNullOrEmptySpace( element.value ) ?
+  '' :
+  element.value;
+};
 
-function disable( id, value ) {
+code.disable = function( id, value ) {
   var element = document.getElementById( id );
 
   if ( element === null ) {
@@ -32,9 +50,9 @@ function disable( id, value ) {
   element.disable = true;
 
   return true;
-}
+};
 
-function enable( id ) {
+code.enable = function( id ) {
   var element = document.getElementById( id );
 
   if ( element === null ) {
@@ -44,9 +62,9 @@ function enable( id ) {
   element.disable = false;
 
   return true;
-}
+};
 
-function showSpinner() {
+code.showSpinner = function() {
   var element = document.getElementById( 'loading-spinner' );
   var button = document.querySelector( 'button[type="submit"]' );
 
@@ -59,11 +77,11 @@ function showSpinner() {
   button.disabled = true;
 
   // also should disable the submit button
-  disable( 'submit' );
-  disable( 'delete' );
-}
+  code.disable( 'submit' );
+  code.disable( 'delete' );
+};
 
-function hideSpinner() {
+code.hideSpinner = function() {
   var element = document.getElementById( 'loading-spinner' );
   var button = document.querySelector( 'button[type="submit"]' );
 
@@ -76,28 +94,28 @@ function hideSpinner() {
   button.disabled = false;
 
   // also should enable the submit button
-  enable( 'submit' );
-}
+  code.enable( 'submit' );
+};
 
 /**
 * . Returns true if the email address is possibly valid.
 * . @param  string email
 * . @return boolean
 */
-function isValidEmail( email ) {
+code.isValidEmail = function( email ) {
     var re = /\S+@\S+/;
     return re.test( email );
-}
+};
 
 /**
  * Returns true if the object is a string.
  * @param  {[type]}  s [description]
  * @return {Boolean}   [description]
  */
-function isValidStringObject( s ) {
-    return !isNullOrEmpty( s ) &&
+code.isValidStringObject = function( s ) {
+    return !code.isNullOrEmpty( s ) &&
     Object.prototype.toString.call( s ) === '[object String]';
-}
+};
 
 /**
  * Logs the specified text to the console if it is available.
@@ -105,13 +123,13 @@ function isValidStringObject( s ) {
  * @param  {[type]} error [description]
  * @return {[type]}       [description]
  */
-function log( text, error ) {
-    if ( isNullOrEmpty( text ) ) {
+code.log = function( text, error ) {
+    if ( code.isNullOrEmpty( text ) ) {
         return;
     }
 
     // 2015.03.04 - if the parameter is not a string, then break down what it is
-    if ( isValidStringObject( text ) === false ) {
+    if ( code.isValidStringObject( text ) === false ) {
         text = JSON.stringify( text );
     }
 
@@ -130,34 +148,34 @@ function log( text, error ) {
           document.console.log( text );
         }
     }
-}
+};
 
 /**
 * . Logs what happened when the app fails to retrieve a record.
 * . @param  string result
 * . @return void
 */
-function getObjectFailed( result ) {
-    log( 'getObjectFailed(); result: ' + JSON.stringify( result ) );
-    log( 'getObjectFailed(); result: ' + result );
+code.getObjectFailed = function( result ) {
+    code.log( 'getObjectFailed(); result: ' + JSON.stringify( result ) );
+    code.log( 'getObjectFailed(); result: ' + result );
 
     // hide the spinner
-    hideSpinner();
-}
+    code.hideSpinner();
+};
 
 /**
   * . Once a user is selected, this fills in the fields with the user details.
   */
-  function fillDetails( object ) {
+code.fillDetails = function( object ) {
     var isEmptyObject = true;
 
     // clear the fields first
-    clearAllFields();
+    code.clearAllFields();
 
     // loops through the keys in the object and sets the values
     for ( var key in object ) {
-      if ( isNullOrEmptySpace( key ) === true ) {
-         log( 'fillDetails(); the key is null or empty space. skipping...' );
+      if ( code.isNullOrEmptySpace( key ) === true ) {
+         code.log( 'fillDetails(); the key is null or empty space. skipping...' );
          continue;
       }
 
@@ -165,7 +183,7 @@ function getObjectFailed( result ) {
       var element = document.getElementById( key.toLowerCase() );
 
       if ( element === null ) {
-         log( 'fillDetails(); the element for key ' + key +
+         code.log( 'fillDetails(); the element for key ' + key +
          ' could not be found. skipping...' );
          continue;
       }
@@ -176,76 +194,76 @@ function getObjectFailed( result ) {
       isEmptyObject = false;
     }
 
-    log( 'fillDetails(); data: ' + JSON.stringify( object ) );
+    code.log( 'fillDetails(); data: ' + JSON.stringify( object ) );
 
     // enable the delete button
     document.getElementById( 'delete' ).disabled = ( isEmptyObject === true ? true : false );
 
     // hide the spinner
-    hideSpinner();
-  }
+    code.hideSpinner();
+  };
 
   /**
   * . Universal function for preparing data to be saved
   */
-  function prepareSaveData2( fileName, selectId, headers ) {
-    log( 'submit(' + fileName + '); headers: ' + headers );
+  code.prepareSaveData2 = function( fileName, selectId, headers ) {
+    code.log( 'submit(' + fileName + '); headers: ' + headers );
 
     // get all of the data on the page using the headers
-    var data = collect( headers );
+    var data = code.collect( headers );
 
     // add the id to the data
-    var recordId = getValue( 'selectId' );
+    var recordId = code.getValue( 'selectId' );
     data.ID = recordId;
 
-    log( 'submit(' + fileName + '); data: ' + JSON.stringify( data ) );
+    code.log( 'submit(' + fileName + '); data: ' + JSON.stringify( data ) );
 
-    google.script.run.withSuccessHandler( saveResult )
-    .withFailureHandler( hideSpinner )
+    google.script.run.withSuccessHandler( code.saveResult )
+    .withFailureHandler( code.hideSpinner )
     .saveData( fileName, recordId, data );
-  }
+  };
 
   /**
   * . Using the headers of the spreadsheet managed by this page,
   * . get the values from all inputs with the same id.
   * . @return object
   */
-  function collect( headers ) {
+  code.collect = function( headers ) {
     var object = {};
 
-    log( 'collect(); headers: ' + JSON.stringify( headers ) );
+    code.log( 'collect(); headers: ' + JSON.stringify( headers ) );
 
     for ( var key in headers ) {
       var header = headers[ key ];
-      if ( isNullOrEmptySpace( key ) === true ||
-      isNullOrEmptySpace( headers[ key ] ) === true ) {
-        log( 'collect(); key is null or empty space' );
+      if ( code.isNullOrEmptySpace( key ) === true ||
+      code.isNullOrEmptySpace( headers[ key ] ) === true ) {
+        code.log( 'collect(); key is null or empty space' );
         continue;
       }
 
       // retrieves the value for the given input, trimming whitespace from
       // the ends
       var id = header.toLowerCase();
-      object[ header ] = getValue( id ).trim();
+      object[ header ] = code.getValue( id ).trim();
 
-      log( 'collect(); header: ' + header );
-      log( 'collect(); value: ' + object[ header ] );
+      code.log( 'collect(); header: ' + header );
+      code.log( 'collect(); value: ' + object[ header ] );
     }
 
-    log( 'collect(); values: ' + JSON.stringify( object ) );
+    code.log( 'collect(); values: ' + JSON.stringify( object ) );
 
     return object;
-  }
+  };
 
   /**
   * . Returns true if the given string represents a valid date.
   * . @param   string  dateString
   * . @returns boolean
   */
-  function isValidDate( dateString ) {
+  code.isValidDate = function( dateString ) {
 
      dateString = ( dateString + '' ).trim();
-     if ( isNullOrEmptySpace( dateString ) === true ||
+     if ( code.isNullOrEmptySpace( dateString ) === true ||
      dateString.match( /[0-9]{4}-[0-9]{2}-[0-9]{2}/ ) === null ) {
         return false;
      }
@@ -255,15 +273,15 @@ function getObjectFailed( result ) {
      var day = dateString.substr( 7 );
      var date = new Date( year, month, day );
 
-     log( 'year:  ' + year );
-     log( 'month: ' + month );
-     log( 'day:   ' + day );
-     log( 'date:  ' + date );
+     code.log( 'year:  ' + year );
+     code.log( 'month: ' + month );
+     code.log( 'day:   ' + day );
+     code.log( 'date:  ' + date );
 
      // validate to make sure the date is valid
      // https://stackoverflow.com/a/1353711/1620794
      return isNaN( date ) === false;
-  }
+  };
 
   /**
   * . Returns true if the specified input already exists in the menu.
@@ -273,7 +291,7 @@ function getObjectFailed( result ) {
   * . @returns array Array of IDs the # of matching options in the
   <select> element, excluding the current one if it exists
   */
-  function exists( inputArray, select ) {
+  code.exists = function( inputArray, select ) {
 
     // 1. Using the IDs of the elements that specify the name of a unique record,
     // create the text
@@ -287,30 +305,30 @@ function getObjectFailed( result ) {
     for ( var key in inputArray ) {
 
        // gets the value of the input
-       var input = getValue( inputArray[ key ] ).trim().toLowerCase();
+       var input = code.getValue( inputArray[ key ] ).trim().toLowerCase();
 
-       log( 'exists(); key: ' + key );
-       log( 'exists(); value id: ' + inputArray[ key ] );
-       log( 'exists(); value: ' + input );
+       code.log( 'exists(); key: ' + key );
+       code.log( 'exists(); value id: ' + inputArray[ key ] );
+       code.log( 'exists(); value: ' + input );
 
        // skip if the input is empty
-       if ( isNullOrEmptySpace( input ) === true ) {
+       if ( code.isNullOrEmptySpace( input ) === true ) {
          continue;
        }
 
-       if ( isNullOrEmptySpace( text ) === false ) {
+       if ( code.isNullOrEmptySpace( text ) === false ) {
          text += ' ';
        }
 
        text += input;
     }
 
-    log( 'exists(); form input: ' + text );
+    code.log( 'exists(); form input: ' + text );
 
     // if this happens, then the validation prior to calling this function
     // did not catch everything. This should basically never happen
-    if ( isNullOrEmptySpace( text ) === true ) {
-       log( 'exists(); the text from the current form is empty. ' +
+    if ( code.isNullOrEmptySpace( text ) === true ) {
+       code.log( 'exists(); the text from the current form is empty. ' +
        'this should almost never happen.' );
        return matches;
     }
@@ -319,16 +337,16 @@ function getObjectFailed( result ) {
     var menu = document.getElementById( select );
 
     if ( menu === null ) {
-       log( 'exists(); could not find <select> element with ID "' + select +
+       code.log( 'exists(); could not find <select> element with ID "' + select +
        '"', true );
        return false;
     }
 
     var options = menu.options;
 
-    if ( isNullOrEmptySpace( menu.options ) === true ||
+    if ( code.isNullOrEmptySpace( menu.options ) === true ||
     menu.options.length === 0 ) {
-       log( 'exists(); no options in <select> element with ID "' + select + '"' );
+       code.log( 'exists(); no options in <select> element with ID "' + select + '"' );
        return matches;
     }
 
@@ -338,9 +356,9 @@ function getObjectFailed( result ) {
     var selectedId = menu.options[ menuIndex ].value;
     var count = menu.options.length;
 
-    log( 'exists(); selected index: ' + menuIndex );
-    log( 'exists(); selected id: ' + selectedId );
-    log( 'exists(); # of options: ' + count );
+    code.log( 'exists(); selected index: ' + menuIndex );
+    code.log( 'exists(); selected id: ' + selectedId );
+    code.log( 'exists(); # of options: ' + count );
 
 
     // loop through each <option> within the <select> and get the text
@@ -350,18 +368,18 @@ function getObjectFailed( result ) {
        var optionText = ( option.text + '' ).trim().toLowerCase();
        var optionIndex = option.index;
 
-       log( 'exists(); option text:  ' + optionText );
-       log( 'exists(); option index: ' + option.index );
-       log( 'exists(); text equal: ' + ( optionText === text ) );
-       log( 'exists(); indexes equal: ' + ( menuIndex === option.index ) );
+       code.log( 'exists(); option text:  ' + optionText );
+       code.log( 'exists(); option index: ' + option.index );
+       code.log( 'exists(); text equal: ' + ( optionText === text ) );
+       code.log( 'exists(); indexes equal: ' + ( menuIndex === option.index ) );
 
        // if the text is the same and the current option index equals
        // the index of the selected item (the one currently being edited / created )
        // then do not include it!
-       if ( isNullOrEmptySpace( menuIndex ) === false &&
+       if ( code.isNullOrEmptySpace( menuIndex ) === false &&
        parseInt( menuIndex, 10 ) === option.index &&
        optionText === text ) {
-         log( 'exists(); editing existing record, no text change...' );
+         code.log( 'exists(); editing existing record, no text change...' );
          continue;
        }
 
@@ -370,15 +388,15 @@ function getObjectFailed( result ) {
        }
 
        // text matches
-       log( 'exists(); current text match: ' + optionText );
+       code.log( 'exists(); current text match: ' + optionText );
        matches.push( option.index );
     }
 
-    log( 'exists(); matched ids: ' + JSON.stringify( matches ) );
+    code.log( 'exists(); matched ids: ' + JSON.stringify( matches ) );
 
     // return an array containing any matches
     return matches;
-  }
+  };
 
   // handles the close button
   document.getElementById( 'close' ).addEventListener( 'click', function( event ) {
@@ -403,3 +421,17 @@ function getObjectFailed( result ) {
         inputs[ 0 ].focus();
     }
   } );
+
+  // confirms whether the user is sure if they want to complete the given action
+} )( window.code = window.code || {},
+    window.jQuery,
+    window,
+    document,
+    window.google,
+    window.moment
+  );
+
+// Down here is the code the defines the parameters used at the top of this
+// self-executing function. undefined is not defined so it is undefined. LOL
+
+} // only execute this code for browsers (client-side code)

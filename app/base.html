@@ -43,17 +43,12 @@
 
   <!-- prints javascript -->
   <!-- moment.js CDN -->
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.21.0/moment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.21.0/moment.min.js"></script>
 
   <!-- javascript common to all pages -->
   <!-- client-size (browser) javascript common to all pages -->
   <!-- use google.script.run to call server-side functions -->
-  <?!= include('common.client.js'); ?>
-
-  <!-- page specific javascript -->
-  <?!= isNullOrEmptySpace(data.js) === true ?
-  '' :
-  ( '<script>' + include(data.js) + '</script>' ); ?>
+  <script><?!= include('common.client'); ?></script>
 
   </body>
 </html>

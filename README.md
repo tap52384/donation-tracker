@@ -33,6 +33,9 @@ that they can be testable.
 
 
 ## TODO
+-   Fix client-side code so that it doesn't run on the server; check for browser-specific globals
+like "window," "document," and "google.script"; all must be present for
+client-side code to run; maybe a simple if statement asking about all three?
 -   Remove the dependency on moment.js
 -   See whether or not the `module.exports` call required by the Jest testing
 framework causes issues with Google Apps Script functioning properly.
@@ -84,3 +87,8 @@ write data uniformly; either all will work or none at all
 -   add support for creating some sort of report with selectable dates for users,
 include couple support so two people can be addressed on the same document
 -   include some sort of breakdown by month and year
+
+<!-- page specific javascript -->
+<?!=
+  // isNullOrEmptySpace(data.js) === true ? '' : ( '<script>' + include(data.js) + '</script>' );
+?>

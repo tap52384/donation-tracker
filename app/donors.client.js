@@ -1,58 +1,74 @@
+if ( isBrowser() === true ) {
+
+;( function( code, $, window, document, google, moment, undefined ) {
+
+// This allows for javascript that should work pretty consistently across browsers and platforms.
+'use strict';
+
+// stop here if window or document are not available;
+if ( code.isNullOrEmpty( window ) === true ||
+code.isNullOrEmpty( document ) === true ) {
+    return;
+}
+
+// log that the file has been reached
+code.log( 'donors.client.js loaded.' );
+
 /**
   *  Add the years to the select menu.
   */
-  function addStateHtml( output ) {
+  code.addStateHtml = function( output ) {
     document.getElementById( 'state' ).innerHTML = output;
-  }
+  };
 
-  function addUsersHtml( output ) {
+  code.addUsersHtml = function( output ) {
     document.getElementById( 'users' ).innerHTML = output;
 
     // clear the fields first
-    clearAllFields();
+    code.clearAllFields();
 
     // stop the spinner
-    hideSpinner();
-  }
+    code.hideSpinner();
+  };
 
-  function printResult() {
-    log( 'header for 800th column: ' + output );
-  }
+  // code.printResult = function() {
+  //   code.log( 'header for 800th column: ' + output );
+  // };
 
-  function saveResult( result ) {
+  code.saveResult = function( result ) {
     if ( result === false ) {
-      log( 'donors(); save failed.', true );
+      code.log( 'donors(); save failed.', true );
 
       // stop the spinner
-      hideSpinner();
+      code.hideSpinner();
 
       return false;
     }
 
     // clear all fields
-    clearAllFields();
+    code.clearAllFields();
 
-    log( 'donors(); save worked!' );
+    code.log( 'donors(); save worked!' );
 
     // reload the users menu
-    google.script.run.withSuccessHandler( addUsersHtml )
+    google.script.run.withSuccessHandler( code.addUsersHtml )
     .fillUsersPicker();
 
     // document.getElementById('manage-donors-form').reset();
     return true;
-  }
+  };
 
   /**
   * . Gets the headers for the "donors" file and saves the data.
   */
-  function prepareSaveData( headers ) {
-    log( 'submit(donors); headers: ' + headers );
+  code.prepareSaveData = function( headers ) {
+    code.log( 'submit(donors); headers: ' + headers );
 
     // get all of the data on the page using the headers
-    var data = collect( headers );
+    var data = code.collect( headers );
 
     // add the id to the data
-    var userId = getValue( 'users' );
+    var userId = code.getValue( 'users' );
     data.ID = userId;
 
     // remove all non-numeric characters from the phone number
@@ -61,14 +77,14 @@
       data.phone = data.phone.replace( /\D/g, '' );
     }
 
-    log( 'submit(donors); data: ' + JSON.stringify( data ) );
+    code.log( 'submit(donors); data: ' + JSON.stringify( data ) );
 
-    google.script.run.withSuccessHandler( saveResult )
-    .withFailureHandler( hideSpinner )
+    google.script.run.withSuccessHandler( code.saveResult )
+    .withFailureHandler( code.hideSpinner )
     .saveData( 'donors', userId, data );
-  }
+  };
 
-  function clearAllFields() {
+  code.clearAllFields = function() {
 
     // clear the fields
      document.getElementById( 'firstname' ).value =
@@ -86,32 +102,33 @@
      '';
 
      document.getElementById( 'delete' ).disabled = true;
-  }
+  };
 
-  function validateInput() {
+  code.validateInput = function() {
      var error = '';
 
      // strips all non-numeric characters
      // https://stackoverflow.com/a/1862219/1620794
-     var phone = getValue( 'phone' ).replace( /\D/g, '' );
-     var email = getValue( 'email' );
-     var dob = getValue( 'dob_at' );
-     var fullName = getValue( 'firstname' ) + ' ' + getValue( 'lastname' );
+     var phone = code.getValue( 'phone' ).replace( /\D/g, '' );
+     var email = code.getValue( 'email' );
+     var dob = code.getValue( 'dob_at' );
+     var fullName = code.getValue( 'firstname' ) + ' ' + code.getValue( 'lastname' );
      var dobMoment = typeof moment === 'function' &&
-     isNullOrEmptySpace( dob ) === false ? moment( dob, 'YYYY-MM-DD' ) : null;
+     code.isNullOrEmptySpace( dob ) === false ? moment( dob, 'YYYY-MM-DD' ) : null;
 
      // for duplicate entry detection
      var displayInputs = [ 'firstname', 'lastname', 'suffix' ];
-     var possibleDupeIds = exists( displayInputs, 'users' );
+     var possibleDupeIds = code.exists( displayInputs, 'users' );
 
      // first name must be at least two characters
-     if ( getValue( 'firstname' ).trim().length < 2 ) {
+     if ( code.getValue( 'firstname' ).trim().length < 2 ) {
        error = 'First name must contain at least two characters.';
-     } else if ( getValue( 'lastname' ).trim().length < 2 ) {
+     } else if ( code.getValue( 'lastname' ).trim().length < 2 ) {
        error = 'Last name must contain at least two characters.';
-     } else if ( isNullOrEmptySpace( phone ) === false && phone.trim().length < 10 ) {
+     } else if ( code.isNullOrEmptySpace( phone ) === false && phone.trim().length < 10 ) {
        error = 'Phone number must be at least 10 digits, including area code.';
-     } else if ( isNullOrEmptySpace( email ) === false && isValidEmail( email ) === false ) {
+     } else if ( code.isNullOrEmptySpace( email ) === false &&
+     code.isValidEmail( email ) === false ) {
        error = 'Please enter a valid email address.';
      } else if ( dobMoment !== null && dobMoment.isValid() === false ) {
        error = 'Please enter a valid date (YYYY-MM-DD).';
@@ -124,42 +141,42 @@
      if the count of the matches > 0, then present the confirm() dialog and only continue if positive
      */
      var okToAdd = possibleDupeIds.length > 0 ?
-     window.confirm( 'A donor with the name "' + fullName + '" already exists; do you still ' +
+     confirm( 'A donor with the name "' + fullName + '" already exists; do you still ' +
      'want to add them?' ) :
      true;
 
-     log( 'validateInput(); error: ' + error );
-     log( 'validateInput(); okToAdd: ' + okToAdd );
+     code.log( 'validateInput(); error: ' + error );
+     code.log( 'validateInput(); okToAdd: ' + okToAdd );
 
      // return true if all required values are given and either the
      // data already exists, is brand new, or the user confirmed adding
      // a duplicate
-     if ( isNullOrEmptySpace( error ) === true && okToAdd === true ) {
+     if ( code.isNullOrEmptySpace( error ) === true && okToAdd === true ) {
        return true;
      }
 
      // show an error if one is generated (not needed for exists since a confirm() is used already)
-     if ( isNullOrEmptySpace( error ) === false ) {
+     if ( code.isNullOrEmptySpace( error ) === false ) {
        alert( error );
      }
      return false;
-  }
+  };
 
 
   document.getElementById( 'users' ).onchange = function( event ) {
      var userId = event.target.value;
 
      // show the spinner
-     showSpinner();
+     code.showSpinner();
 
      // clear all fields
-     clearAllFields();
+     code.clearAllFields();
 
-     log( '#users (change): about to get donor object #' + userId );
+     code.log( '#users (change): about to get donor object #' + userId );
 
      // asynchronously get the user details and fill the <select> menu
-     google.script.run.withSuccessHandler( fillDetails )
-     .withFailureHandler( getObjectFailed )
+     google.script.run.withSuccessHandler( code.fillDetails )
+     .withFailureHandler( code.getObjectFailed )
      .getObject( 'donors', userId );
   };
 
@@ -167,25 +184,25 @@
       event.preventDefault();
 
       // validate the form input
-      if ( validateInput() === false ) {
-        log( 'submit(); validate input failed.' );
+      if ( code.validateInput() === false ) {
+        code.log( 'submit(); validate input failed.' );
         return false;
       }
 
       // show the spinner
-      showSpinner();
+      code.showSpinner();
 
       // get all headers which will also be the IDs of all inputs
-      google.script.run.withSuccessHandler( prepareSaveData )
+      google.script.run.withSuccessHandler( code.prepareSaveData )
       .getHeaders( 'donors' );
   } );
 
   document.getElementById( 'delete' ).addEventListener( 'click', function( event ) {
 
       // get the current user id
-      var userId = getValue( 'users' );
+      var userId = code.getValue( 'users' );
 
-      if ( isNullOrEmptySpace( userId ) === true ) {
+      if ( code.isNullOrEmptySpace( userId ) === true ) {
         return false;
       }
 
@@ -193,13 +210,13 @@
       if ( confirm( 'Are you sure you want to delete this donor?' ) === true ) {
 
         // show the spinner
-        showSpinner();
+        code.showSpinner();
 
         // disable the delete button
-        disable( 'delete' );
+        code.disable( 'delete' );
 
         // delete the data for the current user
-        google.script.run.withSuccessHandler( saveResult )
+        google.script.run.withSuccessHandler( code.saveResult )
         .deleteData( 'donors', userId );
       }
   } );
@@ -207,10 +224,24 @@
   // https://developers.google.com/apps-script/guides/html/communication#success_handlers
   // fills in the select menu that allows the user to choose the year
   // it defaults to the current year
-  google.script.run.withSuccessHandler( addStateHtml )
+  google.script.run.withSuccessHandler( code.addStateHtml )
   .fillStatePicker();
 
-  google.script.run.withSuccessHandler( addUsersHtml )
+  google.script.run.withSuccessHandler( code.addUsersHtml )
   .fillUsersPicker();
 
-log( 'donors code completed.' );
+code.log( 'donors code completed.' );
+
+// confirms whether the user is sure if they want to complete the given action
+} )( window.code = window.code || {},
+  window.jQuery,
+  window,
+  document,
+  window.google,
+  window.moment
+);
+
+// Down here is the code the defines the parameters used at the top of this
+// self-executing function. undefined is not defined so it is undefined. LOL
+
+}

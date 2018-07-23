@@ -8,7 +8,7 @@
  * @param  {[type]} module [description]
  * @return {[type]}        [description]
  */
-if ( module && module.exports ) {
+if ( typeof( module ) !== 'undefined' && module.exports ) {
     var code = {};
     code.isNullOrEmpty = isNullOrEmpty;
     code.isNullOrEmptySpace = isNullOrEmptySpace;
@@ -17,6 +17,16 @@ if ( module && module.exports ) {
 
     // exposes the code so that Jest can test it
     module.exports = code;
+}
+
+/**
+ * [isBrowser description]
+ * @return {Boolean} [description]
+ */
+function isBrowser() {
+   return typeof( window ) !== 'undefined' &&
+   isNullOrEmpty( window ) === false &&
+     isNullOrEmpty( document ) === false;
 }
 
 /**

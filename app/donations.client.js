@@ -1,8 +1,24 @@
+if ( isBrowser() === true ) {
+
+;( function( code, $, window, document, google, moment, undefined ) {
+
+// This allows for javascript that should work pretty consistently across browsers and platforms.
+'use strict';
+
+// stop here if window or document are not available;
+if ( code.isNullOrEmpty( window ) === true ||
+code.isNullOrEmpty( document ) === true ) {
+    return;
+}
+
+// log that the file has been reached
+code.log( 'donations.client.js loaded.' );
+
 /**
  * Resets all fields on the form.
  * @return {[type]} [description]
  */
-function clearAllFields() {
+code.clearAllFields = function() {
 
     // clear the fields
      document.getElementById( 'amount' ).value =
@@ -22,22 +38,22 @@ function clearAllFields() {
      document.getElementById( 'date-given-now' ).checked = true;
 
      // set the default date for the donation to the current state
-     resetGivenDate();
-}
+     code.resetGivenDate();
+};
 
 /**
 *  set the default date for the donation to the current date
 */
-function resetGivenDate() {
+code.resetGivenDate = function() {
 
      // https://stackoverflow.com/a/19079425/1620794
      // https://stackoverflow.com/questions/12409299/how-to-get-current-formatted-date-dd-mm-yyyy-in-javascript-and-append-it-to-an-i/19079425#comment74271020_19079425
      document.getElementById( 'given_at' ).value =
      new Date().toJSON().slice( 0, 10 ).replace( /-/g, '-' );
      return true;
-}
+};
 
-function addDonorsHtml( output ) {
+code.addDonorsHtml = function( output ) {
 
     // add an option for manually entering the name of a new donor on the fly
     // output = '<option value="-1">Add new donor</option>' + output;
@@ -45,31 +61,31 @@ function addDonorsHtml( output ) {
     document.getElementById( 'donor_id' ).innerHTML = output;
 
     // clear the fields first
-    clearAllFields();
+    code.clearAllFields();
 
     // stop the spinner
-    hideSpinner();
-}
+    code.hideSpinner();
+};
 
-function addPaymentMethodsHtml( output ) {
+code.addPaymentMethodsHtml = function( output ) {
     document.getElementById( 'paymentmethod_id' ).innerHTML = output;
 
     // clear the fields first
-    clearAllFields();
+    code.clearAllFields();
 
     // stop the spinner
-    hideSpinner();
-}
+    code.hideSpinner();
+};
 
-function addDonationTypesHtml( output ) {
+code.addDonationTypesHtml = function( output ) {
    document.getElementById( 'donationtype_id' ).innerHTML = output;
 
    // clear the fields first
-    clearAllFields();
+    code.clearAllFields();
 
     // stop the spinner
-    hideSpinner();
-}
+    code.hideSpinner();
+};
 
 /**
 * Shows the UI for adding a new donor on the fly if selected.
@@ -151,11 +167,11 @@ document.getElementById( 'add-donation-type' ).onclick = function( event ) {
 };
 
 
-function validateInput() {
+code.validateInput = function() {
      var error = '';
 
-     var amount = getValue( 'amount' );
-     var donor = getValue( 'donor_id' );
+     var amount = code.getValue( 'amount' );
+     var donor = code.getValue( 'donor_id' );
 
      // var firstname = getValue('firstname');
      // var mi = getValue('mi');
@@ -164,9 +180,9 @@ function validateInput() {
      // var fullName = firstname + ' ' + lastname +
      // ' ' + suffix;
 
-     var paymentMethod = getValue( 'paymentmethod_id' );
-     var donationType = getValue( 'donationtype_id' );
-     var givenDate = getValue( 'given_at' );
+     var paymentMethod = code.getValue( 'paymentmethod_id' );
+     var donationType = code.getValue( 'donationtype_id' );
+     var givenDate = code.getValue( 'given_at' );
 
      // for duplicate entry detection when adding a new donor
      // var displayInputs = ['firstname', 'lastname', 'suffix'];
@@ -179,97 +195,85 @@ function validateInput() {
      //        'required and must be at least 2 characters each.';
      //      }
      // } else
-     if ( isNullOrEmptySpace( paymentMethod ) === true ) {
+     if ( code.isNullOrEmptySpace( paymentMethod ) === true ) {
         error = 'Please select a payment method.';
-     } else if ( isNullOrEmptySpace( donationType ) === true ) {
+     } else if ( code.isNullOrEmptySpace( donationType ) === true ) {
         error = 'Please select a donation type.';
-     } else if ( isNullOrEmptySpace( amount ) === true ||
+     } else if ( code.isNullOrEmptySpace( amount ) === true ||
      isNaN( amount ) === true || +amount !== +amount ||
      parseFloat( amount ) <= 0 ) {
         error = 'Please enter a donation amount greater than 0.';
-     } else if ( isValidDate( givenDate ) === false ) {
+     } else if ( code.isValidDate( givenDate ) === false ) {
         error = 'Please enter a valid donation date in the format YYYY-MM-DD.';
-     } else if ( isNullOrEmptySpace( donor ) === true ) {
+     } else if ( code.isNullOrEmptySpace( donor ) === true ) {
         error = 'Please select a donor.';
      }
 
-     /*
-     get the text of the current item
-     look through all of the items and return an array of ids for those that match
-     pass the current id (if any); if the id of the current id is in the array of ids, leave it out
-     if the count of the matches > 0, then present the confirm() dialog and only continue if positive
-     */
-     // var okToAdd = ( donor === -1 || donor === '-1' ) &&
-     // possibleDupeIds.length > 0 ?
-     // window.confirm('A donor with the name "' + fullName + '" already exists;' +
-     // ' do you still want to add it?') :
-     // true;
-
-     log( 'validateInput(); error: ' + error );
+     code.log( 'validateInput(); error: ' + error );
 
      // log( 'validateInput(); okToAdd: ' + okToAdd);
 
      // return true if all required values are given and either the
      // data already exists, is brand new, or the user confirmed adding
      // a duplicate
-     if ( isNullOrEmptySpace( error ) === true ) {
+     if ( code.isNullOrEmptySpace( error ) === true ) {
         return true;
      }
 
      // show an error if one is generated (not needed for exists since a confirm() is used already)
-     if ( isNullOrEmptySpace( error ) === false ) {
+     if ( code.isNullOrEmptySpace( error ) === false ) {
         alert( error );
      }
      return false;
-}
+};
 
 /**
   * . Gets the headers for the "donors" file and saves the data.
   */
-  function prepareSaveData( headers ) {
-    log( 'submit(donations); headers: ' + headers );
+  code.prepareSaveData = function( headers ) {
+    code.log( 'submit(donations); headers: ' + headers );
 
     // get all of the data on the page using the headers
     // this does not include the ID of this row and never will since
     // this form is used for creation
-    var data = collect( headers );
+    var data = code.collect( headers );
 
     // every new donation will have a new ID
 
-    log( 'submit(donations); data: ' + JSON.stringify( data ) );
+    code.log( 'submit(donations); data: ' + JSON.stringify( data ) );
 
       // fix this function before you allow it to work
       // TODO: need to be able to chain the ability to add a new donor
       // along with adding the actual donation
       // then, the donor_id needs to be set to the new donor id that is returned
       // and then the donation needs to be saved correctly
-     google.script.run.withSuccessHandler( saveResult )
-     .withFailureHandler( hideSpinner )
+     google.script.run.withSuccessHandler( code.saveResult )
+     .withFailureHandler( code.hideSpinner )
      .saveData( 'donations', null, data );
-  }
+  };
 
-  function saveResult( result ) {
+  code.saveResult = function( result ) {
       if ( result === false ) {
-        log( 'donations(); save failed.', true );
+        code.log( 'donations(); save failed.', true );
 
         // stop the spinner
-        hideSpinner();
+        code.hideSpinner();
 
         // stop here
         return false;
       }
 
       // clear all fields
-      clearAllFields();
+      code.clearAllFields();
 
-      log( 'donations(); save worked!' );
+      code.log( 'donations(); save worked!' );
 
       // stop the spinner
-      hideSpinner();
+      code.hideSpinner();
 
       // no items have to be reloaded, so it should be pretty fast...
       return true;
-  }
+  };
 
 /**
 * . Handles when the form is submitted.
@@ -279,21 +283,21 @@ document.getElementById( 'manage-donations-form' )
       event.preventDefault();
 
       // validate the form input
-      if ( validateInput() === false ) {
+      if ( code.validateInput() === false ) {
         return false;
       }
 
       // show the spinner
-      showSpinner();
+      code.showSpinner();
 
       // get all headers which will also be the IDs of all inputs
-      google.script.run.withSuccessHandler( prepareSaveData )
+      google.script.run.withSuccessHandler( code.prepareSaveData )
       .getHeaders( 'donations' );
 } );
 
 document.getElementById( 'date-given-now' )
 .addEventListener( 'click', function( event ) {
-   resetGivenDate();
+   code.resetGivenDate();
 } );
 
 /**
@@ -301,20 +305,34 @@ document.getElementById( 'date-given-now' )
 */
 document.getElementById( 'reset' ).addEventListener( 'click', function( event ) {
 
-    clearAllFields();
+    code.clearAllFields();
 } );
 
 /**
 * Code run to load the donors
 */
-google.script.run.withSuccessHandler( addDonorsHtml )
+google.script.run.withSuccessHandler( code.addDonorsHtml )
 .fillUsersPicker();
 
-google.script.run.withSuccessHandler( addPaymentMethodsHtml )
+google.script.run.withSuccessHandler( code.addPaymentMethodsHtml )
 .fillPaymentMethodsPicker();
 
-google.script.run.withSuccessHandler( addDonationTypesHtml )
+google.script.run.withSuccessHandler( code.addDonationTypesHtml )
 .fillDonationTypesPicker();
 
 // set the current date for the date picker
-clearAllFields();
+code.clearAllFields();
+
+// confirms whether the user is sure if they want to complete the given action
+} )( window.code = window.code || {},
+  window.jQuery,
+  window,
+  document,
+  window.google,
+  window.moment
+);
+
+// Down here is the code the defines the parameters used at the top of this
+// self-executing function. undefined is not defined so it is undefined. LOL
+
+}

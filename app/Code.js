@@ -95,7 +95,7 @@ function onInstall( e ) {
 function manageDonors() {
 
    // type HtmlOutput
-   var html = extendTemplate( 'base', 'donors', 'customcss', 'donors.js' );
+   var html = extendTemplate( 'base', 'donors', 'customcss', 'donors.client' );
 
    // Ui
    SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
@@ -106,7 +106,7 @@ function manageDonors() {
 function manageDonations() {
 
   // HtmlOutput
-  var html = extendTemplate( 'base', 'donations', 'customcss', 'donations.js' );
+  var html = extendTemplate( 'base', 'donations', 'customcss', 'donations.client' );
 
   // Ui
    SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
@@ -117,7 +117,7 @@ function manageDonations() {
 function manageDonationTypes() {
 
   // HtmlOutput
-  var html = extendTemplate( 'base', 'donation-types', 'customcss', 'donation-types.js' );
+  var html = extendTemplate( 'base', 'donation-types', 'customcss', 'donation-types.client' );
 
   // Ui
    SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
@@ -128,7 +128,7 @@ function manageDonationTypes() {
 function managePaymentMethods() {
 
   // HtmlOutput
-  var html = extendTemplate( 'base', 'payment-methods', 'customcss', 'payment-methods.js' );
+  var html = extendTemplate( 'base', 'payment-methods', 'customcss', 'payment-methods.client' );
 
   // Ui
    SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
