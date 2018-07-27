@@ -1,15 +1,7 @@
-if ( isBrowser() === true ) {
-
 ;( function( code, $, window, document, google, moment, undefined ) {
 
 // This allows for javascript that should work pretty consistently across browsers and platforms.
 'use strict';
-
-// stop here if window or document are not available;
-if ( code.isNullOrEmpty( window ) === true ||
-code.isNullOrEmpty( document ) === true ) {
-    return;
-}
 
 // log that the file has been reached
 code.log( 'donors.client.js loaded.' );
@@ -243,5 +235,3 @@ code.log( 'donors code completed.' );
 
 // Down here is the code the defines the parameters used at the top of this
 // self-executing function. undefined is not defined so it is undefined. LOL
-
-}

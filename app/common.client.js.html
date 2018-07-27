@@ -1,18 +1,10 @@
-if ( isBrowser() === true ) {
-
 ;( function( code, $, window, document, google, moment, undefined ) {
 
 // This allows for javascript that should work pretty consistently across browsers and platforms.
 'use strict';
 
-// stop here if window or document are not available;
-if ( code.isNullOrEmpty( window ) === true ||
-code.isNullOrEmpty( document ) === true ) {
-    return;
-}
-
 // log that the file has been reached
-code.log( 'common.client.js loaded.' );
+// code.log( 'common.client.js loaded.' );
 
 /**
 * . Returns true if the specified variable is null,
@@ -40,7 +32,7 @@ code.getValue = function( id ) {
   element.value;
 };
 
-code.disable = function( id, value ) {
+code.disable = function( id ) {
   var element = document.getElementById( id );
 
   if ( element === null ) {
@@ -398,29 +390,37 @@ code.fillDetails = function( object ) {
     return matches;
   };
 
+  code.closeButton = document.getElementById( 'close' );
+  code.resetButton = document.getElementById( 'reset' );
+
   // handles the close button
-  document.getElementById( 'close' ).addEventListener( 'click', function( event ) {
+  if ( code.isNullOrEmpty( code.closeButton ) === false ) {
+    code.closeButton.addEventListener( 'click', function() {
 
-     // closes the dialog window
-     // https://developers.google.com/apps-script/guides/html/reference/host
-     google.script.host.close();
+       // closes the dialog window
+       // https://developers.google.com/apps-script/guides/html/reference/host
+       google.script.host.close();
 
-  } );
+    } );
+  }
 
-  document.getElementById( 'reset' ).addEventListener( 'click', function( event ) {
+  if ( code.isNullOrEmpty( code.resetButton ) === false ) {
+    document.getElementById( 'reset' ).addEventListener( 'click', function() {
 
-    // disable the delete button
-    var button = document.getElementById( 'delete' );
-    if ( button !== null ) {
-      button.disabled = true;
-    }
+      // disable the delete button
+      var button = document.getElementById( 'delete' );
+      if ( button !== null ) {
+        button.disabled = true;
+      }
 
-    // set the focus to the input to the first <input>
-    var inputs = document.getElementsByTagName( 'input' );
-    if ( inputs !== null && inputs.lengths > 0 ) {
-        inputs[ 0 ].focus();
-    }
-  } );
+      // set the focus to the input to the first <input>
+      var inputs = document.getElementsByTagName( 'input' );
+      if ( inputs !== null && inputs.lengths > 0 ) {
+          inputs[ 0 ].focus();
+      }
+    } );
+  }
+
 
   // confirms whether the user is sure if they want to complete the given action
 } )( window.code = window.code || {},
@@ -433,5 +433,3 @@ code.fillDetails = function( object ) {
 
 // Down here is the code the defines the parameters used at the top of this
 // self-executing function. undefined is not defined so it is undefined. LOL
-
-} // only execute this code for browsers (client-side code)

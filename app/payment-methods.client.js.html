@@ -1,18 +1,10 @@
-if ( isBrowser() === true ) {
-
 ;( function( code, $, window, document, google, moment, undefined ) {
 
 // This allows for javascript that should work pretty consistently across browsers and platforms.
 'use strict';
 
-// stop here if window or document are not available;
-if ( code.isNullOrEmpty( window ) === true ||
-code.isNullOrEmpty( document ) === true ) {
-    return;
-}
-
 // log that the file has been reached
-code.log( 'donation-types.client.js loaded.' );
+code.log( 'payment-methods.client.js loaded.' );
 
 code.clearAllFields = function() {
 
@@ -21,9 +13,9 @@ code.clearAllFields = function() {
     document.getElementById( 'delete' ).disabled = true;
 };
 
-code.addDonationTypesHtml = function( output ) {
-    code.log( 'addDonationTypesHtml(); about to set <select> innerHTML...' );
-    document.getElementById( 'donation-types' ).innerHTML = output;
+code.addPaymentMethodsHtml = function( output ) {
+    code.log( 'addPaymentMethodsHtml(); about to set <select> innerHTML...' );
+    document.getElementById( 'payment-methods' ).innerHTML = output;
 
     // clear the fields first
     code.clearAllFields();
@@ -37,11 +29,11 @@ code.validateInput = function() {
 
      var name = code.getValue( 'name' );
      var displayInputs = [ 'name' ];
-     var possibleDupeIds = code.exists( displayInputs, 'donation-types' );
+     var possibleDupeIds = code.exists( displayInputs, 'payment-methods' );
 
-     // name of donation type must be at least two characters
+     // name of payment method must be at least two characters
      if ( name.trim().length < 2 ) {
-        error = 'The name of the donation type must contain at least two characters.';
+        error = 'The name of the payment method must contain at least two characters.';
      }
 
      /*
@@ -51,7 +43,7 @@ code.validateInput = function() {
      if the count of the matches > 0, then present the confirm() dialog and only continue if positive
      */
      var okToAdd = possibleDupeIds.length > 0 ?
-     confirm( 'A donation type with the name "' + name + '" already exists; do you still ' +
+     confirm( 'A payment method with the name "' + name + '" already exists; do you still ' +
      'want to add it?' ) :
      true;
 
@@ -74,7 +66,7 @@ code.validateInput = function() {
 
 code.saveResult = function( result ) {
     if ( result === false ) {
-      code.log( 'donation-types(); save failed.', true );
+      code.log( 'payment-methods(); save failed.', true );
 
       // stop the spinner
       code.hideSpinner();
@@ -86,11 +78,11 @@ code.saveResult = function( result ) {
     // clear all fields
     code.clearAllFields();
 
-    code.log( 'donation-types(); save worked!' );
+    code.log( 'payment-methods(); save worked!' );
 
-    // reload the donation-types menu
-    google.script.run.withSuccessHandler( code.addDonationTypesHtml )
-    .fillDonationTypesPicker();
+    // reload the payment-methods menu
+    google.script.run.withSuccessHandler( code.addPaymentMethodsHtml )
+    .fillPaymentMethodsPicker();
 
     // document.getElementById('manage-donors-form').reset();
     return true;
@@ -100,26 +92,26 @@ code.saveResult = function( result ) {
   * . Gets the headers for the "donors" file and saves the data.
   */
   code.prepareSaveData = function( headers ) {
-    code.log( 'submit(donation-types); headers: ' + headers );
+    code.log( 'submit(payment-methods); headers: ' + headers );
 
     // get all of the data on the page using the headers
     var data = code.collect( headers );
 
     // add the id to the data
-    var userId = code.getValue( 'donation-types' );
+    var userId = code.getValue( 'payment-methods' );
     data.ID = userId;
 
-    code.log( 'submit(donation-types); data: ' + JSON.stringify( data ) );
+    code.log( 'submit(payment-methods); data: ' + JSON.stringify( data ) );
 
     google.script.run.withSuccessHandler( code.saveResult )
     .withFailureHandler( code.hideSpinner )
-    .saveData( 'donation-types', userId, data );
+    .saveData( 'payment-methods', userId, data );
 };
 
 /**
 * . Handles when the form is submitted.
 */
-document.getElementById( 'manage-donation-types-form' )
+document.getElementById( 'manage-payment-methods-form' )
 .addEventListener( 'submit', function( event ) {
       event.preventDefault();
 
@@ -133,13 +125,13 @@ document.getElementById( 'manage-donation-types-form' )
 
       // get all headers which will also be the IDs of all inputs
       google.script.run.withSuccessHandler( code.prepareSaveData )
-      .getHeaders( 'donation-types' );
+      .getHeaders( 'payment-methods' );
   } );
 
 /**
-* . Handles when the <select> for donation types is changed.
+* . Handles when the <select> for payment methods is changed.
 */
-document.getElementById( 'donation-types' ).onchange = function( event ) {
+document.getElementById( 'payment-methods' ).onchange = function( event ) {
      var userId = event.target.value;
 
      // show the spinner
@@ -148,25 +140,25 @@ document.getElementById( 'donation-types' ).onchange = function( event ) {
      // clear all fields
      code.clearAllFields();
 
-     code.log( '#donation-types (change): about to get donation-type object #' + userId );
+     code.log( '#payment-methods (change): about to get payment-methods object #' + userId );
 
      // asynchronously get the user details and fill the <select> menu
      google.script.run.withSuccessHandler( code.fillDetails )
      .withFailureHandler( code.getObjectFailed )
-     .getObject( 'donation-types', userId );
+     .getObject( 'payment-methods', userId );
 };
 
 document.getElementById( 'delete' ).addEventListener( 'click', function( event ) {
 
       // get the current user id
-      var userId = code.getValue( 'donation-types' );
+      var userId = code.getValue( 'payment-methods' );
 
       if ( code.isNullOrEmptySpace( userId ) === true ) {
         return false;
       }
 
       // only proceed once you have confirmation
-      if ( confirm( 'Are you sure you want to delete this donation type?' ) === true ) {
+      if ( confirm( 'Are you sure you want to delete this payment method?' ) === true ) {
 
         // show the spinner
         code.showSpinner();
@@ -176,15 +168,15 @@ document.getElementById( 'delete' ).addEventListener( 'click', function( event )
 
         // delete the data for the current user
         google.script.run.withSuccessHandler( code.saveResult )
-        .deleteData( 'donation-types', userId );
+        .deleteData( 'payment-methods', userId );
       }
   } );
 
 /**
 * . Code that loads on page load
 */
-google.script.run.withSuccessHandler( code.addDonationTypesHtml )
-.fillDonationTypesPicker();
+google.script.run.withSuccessHandler( code.addPaymentMethodsHtml )
+.fillPaymentMethodsPicker();
 
 // confirms whether the user is sure if they want to complete the given action
 } )( window.code = window.code || {},
@@ -197,5 +189,3 @@ google.script.run.withSuccessHandler( code.addDonationTypesHtml )
 
 // Down here is the code the defines the parameters used at the top of this
 // self-executing function. undefined is not defined so it is undefined. LOL
-
-}
