@@ -10,7 +10,9 @@ code.clearAllFields = function() {
 
     // clear the fields
     document.getElementById( 'name' ).value = '';
-    document.getElementById( 'delete' ).disabled = true;
+    code.disable( 'delete' );
+
+    // document.getElementById( 'delete' ).disabled = true;
 };
 
 code.addDonationTypesHtml = function( output ) {
@@ -108,75 +110,94 @@ code.saveResult = function( result ) {
     .saveData( 'donation-types', userId, data );
 };
 
-/**
-* . Handles when the form is submitted.
-*/
-document.getElementById( 'manage-donation-types-form' )
-.addEventListener( 'submit', function( event ) {
-      event.preventDefault();
+// buttons on this form
+code.deleteButton = document.getElementById( 'delete' );
+code.mainForm = document.getElementById( 'manage-donation-types-form' );
+code.donationTypes = document.getElementById( 'donation-types' );
 
-      // validate the form input
-      if ( code.validateInput() === false ) {
-        return false;
-      }
+if ( code.isNullOrEmpty( code.mainForm ) === false ) {
 
-      // show the spinner
-      code.showSpinner();
+  /**
+  * . Handles when the form is submitted.
+  */
+  code.mainForm.addEventListener( 'submit', function( event ) {
+        event.preventDefault();
 
-      // get all headers which will also be the IDs of all inputs
-      google.script.run.withSuccessHandler( code.prepareSaveData )
-      .getHeaders( 'donation-types' );
-  } );
-
-/**
-* . Handles when the <select> for donation types is changed.
-*/
-document.getElementById( 'donation-types' ).onchange = function( event ) {
-     var userId = event.target.value;
-
-     // show the spinner
-     code.showSpinner();
-
-     // clear all fields
-     code.clearAllFields();
-
-     code.log( '#donation-types (change): about to get donation-type object #' + userId );
-
-     // asynchronously get the user details and fill the <select> menu
-     google.script.run.withSuccessHandler( code.fillDetails )
-     .withFailureHandler( code.getObjectFailed )
-     .getObject( 'donation-types', userId );
-};
-
-document.getElementById( 'delete' ).addEventListener( 'click', function( event ) {
-
-      // get the current user id
-      var userId = code.getValue( 'donation-types' );
-
-      if ( code.isNullOrEmptySpace( userId ) === true ) {
-        return false;
-      }
-
-      // only proceed once you have confirmation
-      if ( confirm( 'Are you sure you want to delete this donation type?' ) === true ) {
+        // validate the form input
+        if ( code.validateInput() === false ) {
+          return false;
+        }
 
         // show the spinner
         code.showSpinner();
 
-        // disable the delete button
-        code.disable( 'delete' );
+        // get all headers which will also be the IDs of all inputs
+        google.script.run.withSuccessHandler( code.prepareSaveData )
+        .getHeaders( 'donation-types' );
+    } );
+}
 
-        // delete the data for the current user
-        google.script.run.withSuccessHandler( code.saveResult )
-        .deleteData( 'donation-types', userId );
-      }
-  } );
+if ( code.isNullOrEmpty( code.donationTypes ) === false ) {
 
-/**
-* . Code that loads on page load
-*/
-google.script.run.withSuccessHandler( code.addDonationTypesHtml )
-.fillDonationTypesPicker();
+  code.log( 'donation-types <select> element exists!' );
+  console.log( 'whatever...' );
+
+  /**
+  * . Handles when the <select> for donation types is changed.
+  */
+  code.donationTypes.onchange = function( event ) {
+       var userId = event.target.value;
+
+       // show the spinner
+       code.showSpinner();
+
+       // clear all fields
+       code.clearAllFields();
+
+       code.log( '#donation-types (change): about to get donation-type object #' + userId );
+
+       // asynchronously get the user details and fill the <select> menu
+       google.script.run.withSuccessHandler( code.fillDetails )
+       .withFailureHandler( code.getObjectFailed )
+       .getObject( 'donation-types', userId );
+  };
+}
+
+if ( code.isNullOrEmpty( code.deleteButton ) === false ) {
+  code.deleteButton.addEventListener( 'click', function() {
+
+        // get the current user id
+        var userId = code.getValue( 'donation-types' );
+
+        if ( code.isNullOrEmptySpace( userId ) === true ) {
+          return false;
+        }
+
+        // only proceed once you have confirmation
+        if ( confirm( 'Are you sure you want to delete this donation type?' ) === true ) {
+
+          // show the spinner
+          code.showSpinner();
+
+          // disable the delete button
+          code.disable( 'delete' );
+
+          // delete the data for the current user
+          google.script.run.withSuccessHandler( code.saveResult )
+          .deleteData( 'donation-types', userId );
+        }
+    } );
+}
+
+if ( google && google.script && google.script.run ) {
+
+  /**
+  * . Code that loads on page load
+  */
+  google.script.run.withSuccessHandler( code.addDonationTypesHtml )
+  .fillDonationTypesPicker();
+}
+
 
 // confirms whether the user is sure if they want to complete the given action
 } )( window.code = window.code || {},

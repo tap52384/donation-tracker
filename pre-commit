@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# execute unit tests
+npm run test
+
+# gets the status code of the last command that was executed
+status=$?
+
+# if the unit tests fail, exit and prevent the commit
+if [ $status -ne 0 ]; then
+    echo -e "Unit tests failed. Commit aborted."
+    exit $status
+fi
+
+exit 0

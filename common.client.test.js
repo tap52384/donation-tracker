@@ -3,6 +3,8 @@
 // requires the necessary code
 require( './app/common.client.js.html' );
 
+console.log( 'location: ' + window.location.href );
+
 test( 'verifies jest tests are working', () => {
     expect( true ).toBe( true );
 } );

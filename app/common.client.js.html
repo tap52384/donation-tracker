@@ -3,9 +3,6 @@
 // This allows for javascript that should work pretty consistently across browsers and platforms.
 'use strict';
 
-// log that the file has been reached
-// code.log( 'common.client.js loaded.' );
-
 /**
 * . Returns true if the specified variable is null,
 * . empty, or undefined.
@@ -13,6 +10,45 @@
 */
 code.isNullOrEmpty = function( x ) {
     return x === undefined || x === '' || x === null;
+};
+
+/**
+ * Logs the specified text to the console if it is available.
+ * @param  {[type]} text  [description]
+ * @param  {[type]} error [description]
+ * @return {[type]}       [description]
+ */
+code.log = function( text, error ) {
+    if ( code.isNullOrEmpty( text ) ) {
+        return;
+    }
+
+    // 2015.03.04 - if the parameter is not a string, then break down what it is
+    if ( code.isValidStringObject( text ) === false ) {
+        text = JSON.stringify( text );
+    }
+
+    if ( window.console ) {
+
+        if ( error && window.console.error ) {
+          window.console.error( text );
+        } else if ( window.console.log ) {
+          window.console.log( text );
+        }
+    } else if ( document.console ) {
+
+        if ( error && document.console.error ) {
+          document.console.error( text );
+        } else if ( document.console.log ) {
+          document.console.log( text );
+        }
+    } else if ( console ) {
+        if ( error && console.error ) {
+          console.error( text );
+        } else if ( console.log ) {
+          console.log( text );
+        }
+    }
 };
 
 /**
@@ -109,38 +145,6 @@ code.isValidStringObject = function( s ) {
     Object.prototype.toString.call( s ) === '[object String]';
 };
 
-/**
- * Logs the specified text to the console if it is available.
- * @param  {[type]} text  [description]
- * @param  {[type]} error [description]
- * @return {[type]}       [description]
- */
-code.log = function( text, error ) {
-    if ( code.isNullOrEmpty( text ) ) {
-        return;
-    }
-
-    // 2015.03.04 - if the parameter is not a string, then break down what it is
-    if ( code.isValidStringObject( text ) === false ) {
-        text = JSON.stringify( text );
-    }
-
-    if ( window.console ) {
-
-        if ( error && window.console.error ) {
-          window.console.error( text );
-        } else if ( window.console.log ) {
-          window.console.log( text );
-        }
-    } else if ( document.console ) {
-
-        if ( error && document.console.error ) {
-          document.console.error( text );
-        } else if ( document.console.log ) {
-          document.console.log( text );
-        }
-    }
-};
 
 /**
 * . Logs what happened when the app fails to retrieve a record.
@@ -420,6 +424,9 @@ code.fillDetails = function( object ) {
       }
     } );
   }
+
+  // log that the file has been reached
+  code.log( 'common.client.js loaded.' );
 
 
   // confirms whether the user is sure if they want to complete the given action

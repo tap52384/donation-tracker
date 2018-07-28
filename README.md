@@ -29,6 +29,13 @@ the client-side code to its own file and then include it in the HTML files so
 that they can be testable.
 
 [Jest](https://jestjs.io/en/)
+[jsdom](https://www.npmjs.com/package/jsdom)
+
+Once you install the `jsdom` package, even without referencing the package in
+your Jest tests, you'll need to specify the `testURL` property in your
+`jest.config.js` file to `http://localhost/`:
+<https://stackoverflow.com/a/51554619/1620794>
+
 
 
 
