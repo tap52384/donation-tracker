@@ -5,6 +5,15 @@
 
 // log that the file has been reached
 code.log( 'donation-types.client.js loaded.' );
+code.log( 'result: ' + document.getElementById( 'delete' ) );
+
+// buttons on this form
+code.deleteButton = document.getElementById( 'delete' );
+code.mainForm = document.getElementById( 'manage-donation-types-form' );
+code.donationTypes = document.getElementById( 'donation-types' );
+
+code.log( 'donation-types elements should be loaded now...' );
+code.log( 'donationTypes found: ' + ( code.donationTypes ? 'true' : 'false' ) );
 
 code.clearAllFields = function() {
 
@@ -110,10 +119,6 @@ code.saveResult = function( result ) {
     .saveData( 'donation-types', userId, data );
 };
 
-// buttons on this form
-code.deleteButton = document.getElementById( 'delete' );
-code.mainForm = document.getElementById( 'manage-donation-types-form' );
-code.donationTypes = document.getElementById( 'donation-types' );
 
 if ( code.isNullOrEmpty( code.mainForm ) === false ) {
 
@@ -140,7 +145,6 @@ if ( code.isNullOrEmpty( code.mainForm ) === false ) {
 if ( code.isNullOrEmpty( code.donationTypes ) === false ) {
 
   code.log( 'donation-types <select> element exists!' );
-  console.log( 'whatever...' );
 
   /**
   * . Handles when the <select> for donation types is changed.

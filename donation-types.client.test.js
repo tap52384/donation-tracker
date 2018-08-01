@@ -18,31 +18,45 @@ test( 'verifies document is available before loading DOM...', () => {
 
 test( 'loads the DOM ', () => {
     return JSDOM.fromFile( html ).then( result => {
-
-        // saves the JSDOM object made from the imported HTML for later use
         dom = result;
+        document = result.window.document;
 
-        // sets the document variable to the one created by JSDOM
-        document = dom.window.document;
+        // requires my code to be tested
+        require( './app/common.client.js.html' );
+        require( './app/donation-types.client.js.html' );
 
-        // prints out the imported HTML
+
         // console.log( dom.serialize() );
     } ).catch( e => expect( e ).toMatch( 'error' ) );
 } );
 
-// requires my code to be tested
-require( './app/common.client.js.html' );
-require( './app/donation-types.client.js.html' );
 
-// tests
-test( 'verifies jest tests are working', () => {
-    expect( true ).toBe( true );
-} );
+JSDOM.fromFile( html ).then( function( result ) {
 
-test( 'verifies that the DOM is not null', () => {
-    expect( dom ).not.toBe( null );
-} );
+  // sets the document variable to the one created by JSDOM
+  document = result.window.document;
+  window.document = result.window.document;
 
-test( 'verifies that the form exists from jsdom', () => {
-    expect( dom.window.document.getElementById( 'manage-donation-types-form' ) ).not.toBe( null );
+  // // requires my code to be tested
+  // require( './app/common.client.js.html' );
+  // require( './app/donation-types.client.js.html' );
+
+  // prints out the imported HTML
+  // console.log( result.serialize() );
+  return true;
+
+} )
+.then( function() {
+
+
+    test( 'verifies that the DOM is not null', () => {
+        expect( dom ).not.toBe( null );
+    } );
+
+    test( 'verifies that the form exists for testing', () => {
+        expect( window.code.isNullOrEmpty( window.code.mainForm ) ).toBe( false );
+    } );
+} )
+.catch( function( error ) {
+  console.log( error.message );
 } );

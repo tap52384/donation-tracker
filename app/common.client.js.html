@@ -160,6 +160,94 @@ code.getObjectFailed = function( result ) {
 };
 
 /**
+ * Returns true if the specified property exists in the specified object.
+ * @param obj An object.
+ * @param prop A property name, property has to be a string.
+ * @return bool
+ */
+code.hasProperty = function( obj, prop ) {
+
+    return code.isNullOrEmpty( obj ) === false &&
+    code.isNullOrEmptySpace( prop ) === false &&
+    (
+        Object.prototype.hasOwnProperty.call( obj, prop ) ||
+        obj.hasOwnProperty( prop ) ||
+        obj.prop !== undefined ||
+        'undefined' !== typeof obj[ prop ]
+    );
+};
+
+/**
+ * Returns true if the specified object has no properties.
+ * @param obj An object.
+ * @return bool
+ */
+code.isEmptyObject = function( obj ) {
+
+    // empty objects have no properties
+    if ( obj === null || obj === undefined ) {
+        code.log( 'isEmptyObject(): object is null or undefined.' );
+        return true;
+    }
+
+    // ECMAScript5 method of counting properties
+    if ( Object && code.hasProperty( Object, 'getOwnPropertyNames' ) ) {
+        var length = Object.getOwnPropertyNames( obj ).length;
+        code.log( 'isEmptyObject(): getOwnPropertyNames revealed ' +
+        length + ' properties in this object.' );
+        return Object.getOwnPropertyNames( obj ).length === 0;
+    }
+
+    if ( obj.length > 0 ) {
+        code.log( 'isEmptyObject(): object has a length property greater than 0' );
+        return false;
+    }
+
+    for ( var key in obj ) {
+        if ( hasOwnProperty.call( obj, key ) ) {
+            code.log( 'isEmptyObject(): hasOwnProperty found at least one property.' );
+            return false;
+        }
+    }
+
+    // default value
+    code.log( 'isEmptyObject(): failed to prove at least one property exists.' );
+    return true;
+};
+
+/**
+ * Prints all properties of the given object to the console.
+ * @param  object obj
+ * @return void
+ */
+code.printProperties = function( obj ) {
+
+    // stop here if the object is empty
+    if ( code.isEmptyObject( obj ) === true ) {
+        code.log( 'The specified object does not have any properties.' );
+        return;
+    }
+
+    code.log( 'specified object is not empty: ' + obj );
+
+    Object.getOwnPropertyNames( obj ).forEach(
+        function( val ) {
+
+            // if an object, call this object recursively?
+            var type = Object.prototype.toString.call( obj[ val ] );
+
+            if ( type === '[object Object]' ||
+            type.indexOf( '[object' ) !== -1 ) {
+                code.log( val + ':' );
+                code.printProperties( obj[ val ] );
+            }
+
+            code.log( val + ' -> ' + obj[ val ] );
+        }
+    );
+};
+
+/**
   * . Once a user is selected, this fills in the fields with the user details.
   */
 code.fillDetails = function( object ) {
@@ -193,7 +281,7 @@ code.fillDetails = function( object ) {
     code.log( 'fillDetails(); data: ' + JSON.stringify( object ) );
 
     // enable the delete button
-    document.getElementById( 'delete' ).disabled = ( isEmptyObject === true ? true : false );
+    document.getElementById( 'delete' ).disabled = isEmptyObject === true;
 
     // hide the spinner
     code.hideSpinner();
