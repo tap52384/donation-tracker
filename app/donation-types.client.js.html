@@ -5,7 +5,6 @@
 
 // log that the file has been reached
 code.log( 'donation-types.client.js loaded.' );
-code.log( 'result: ' + document.getElementById( 'delete' ) );
 
 // buttons on this form
 code.deleteButton = document.getElementById( 'delete' );
@@ -20,8 +19,6 @@ code.clearAllFields = function() {
     // clear the fields
     document.getElementById( 'name' ).value = '';
     code.disable( 'delete' );
-
-    // document.getElementById( 'delete' ).disabled = true;
 };
 
 code.addDonationTypesHtml = function( output ) {
@@ -207,9 +204,9 @@ if ( google && google.script && google.script.run ) {
 } )( window.code = window.code || {},
   window.jQuery,
   window,
-  document,
-  window.google,
-  window.moment
+  window.document,
+  window.google = window.google || {},
+  window.moment = window.moment || {}
 );
 
 // Down here is the code the defines the parameters used at the top of this

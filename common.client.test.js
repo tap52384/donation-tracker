@@ -1,5 +1,17 @@
 /* eslint-env jest, es6 */
 
+// creates an empty DOM to be used to create global window and document objects
+const jsdom = require( 'jsdom' );
+const { JSDOM } = jsdom;
+var dom = new JSDOM();
+
+// global is a node.js global object
+if ( global !== undefined ) {
+  global.window = dom.window;
+  global.document = dom.window.document;
+}
+
+
 // requires the necessary code
 require( './app/common.client.js.html' );
 
@@ -28,4 +40,8 @@ test( 'isNullOrEmptySpace works correctly', () => {
     expect( window.code.isNullOrEmptySpace( '  ' ) ).toBe( true );
     expect( window.code.isNullOrEmptySpace( null ) ).toBe( true );
     expect( window.code.isNullOrEmptySpace( 'donation ' ) ).toBe( false );
+} );
+
+test( 'collect() function exists', () => {
+    expect( typeof window.code.collect ).toMatch( 'function' );
 } );
