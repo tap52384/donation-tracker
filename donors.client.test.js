@@ -7,7 +7,7 @@ const fs = require( 'fs' );
 
 // __dirname is a Node.js global object
 // https://nodejs.org/api/globals.html
-const html = fs.readFileSync( __dirname + '/app/donations.html' ).toString();
+const html = fs.readFileSync( __dirname + '/app/donors.html' ).toString();
 
 // HTML to be imported as DOM
 // const html = './app/donation-types.html';
@@ -45,7 +45,7 @@ expect.extend( {
 
 // requires my code to be tested
 require( './app/common.client.js.html' );
-require( './app/donations.client.js.html' );
+require( './app/donors.client.js.html' );
 
 test( 'sees if window is available before loading DOM...', () => {
     expect( window !== undefined ).toBe( true );
@@ -68,20 +68,12 @@ test( 'verifies that the form exists for testing', () => {
     expect( window.code.isNullOrEmpty( window.code.mainForm ) ).toBe( false );
 } );
 
-test( 'verifies donations <select> exists', () => {
-    expect( document.getElementById( 'donor_id' ) ).not.toBeNull();
+test( 'verifies donors <select> exists', () => {
+    expect( document.getElementById( 'users' ) ).not.toBeNull();
 } );
 
-test( 'verifies donation-types <select> exists', () => {
-    expect( document.getElementById( 'donationtype_id' ) ).not.toBeNull();
-} );
-
-test( 'verifies payment-methods <select> exists', () => {
-    expect( document.getElementById( 'paymentmethod_id' ) ).not.toBeNull();
-} );
-
-test( 'verifies that the delete button does NOT exist', () => {
-    expect( document.getElementById( 'delete' ) ).toBeNull();
+test( 'verifies that the delete button exists', () => {
+    expect( document.getElementById( 'delete' ) ).not.toBeNull();
 } );
 
 test( 'collect() function exists', () => {
@@ -108,41 +100,29 @@ test( 'showSpinner() function exists', () => {
     expect( typeof window.code.showSpinner ).toMatch( 'function' );
 } );
 
-test( 'only numbers are allowed for donation amounts', () => {
-    var amount = document.getElementById( 'amount' );
-    amount.value = 'a';
-    expect( amount.value ).isNullOrEmpty();
-    amount.value = '-1b';
-    expect( amount.value ).isNullOrEmpty();
-    amount.value = '9zujeig';
-    expect( amount.value ).isNullOrEmpty();
-    amount.value = 1.99;
-    expect( amount.value ).toMatch( '1.99' );
-} );
-
-test( 'only valid dates are allowed for donation date', () => {
-    var givenAt = document.getElementById( 'given_at' );
-    expect( givenAt.type ).toMatch( 'date' );
-    givenAt.value = 'yyyy-mm-dd';
-    expect( givenAt.value ).isNullOrEmpty();
-    givenAt.value = '2018-01-01';
-    expect( givenAt.value ).not.isNullOrEmpty();
-    expect( givenAt.step ).toMatch( '1' );
+test( 'only valid dates are allowed for date of birth', () => {
+    var dobAt = document.getElementById( 'dob_at' );
+    expect( dobAt.type ).toMatch( 'date' );
+    dobAt.value = 'yyyy-mm-dd';
+    expect( dobAt.value ).isNullOrEmpty();
+    dobAt.value = '2018-01-01';
+    expect( dobAt.value ).not.isNullOrEmpty();
+    expect( dobAt.step ).toMatch( '1' );
 
     // 1. Get the date
-    var date = new Date( Date.parse( givenAt.value ) );
+    var date = new Date( Date.parse( dobAt.value ) );
 
     // 2. Add a day to it
-    date.setDate( date.getDate() + parseInt( givenAt.step, 10 ) );
+    date.setDate( date.getDate() + parseInt( dobAt.step, 10 ) );
 
     // 3. Set the new date to this date using .toISOString()
     window.code.log( 'new date: ' + date.toISOString() );
     window.code.log( 'new date only: ' + date.toISODateString() );
-    givenAt.value = date.toISODateString();
+    dobAt.value = date.toISODateString();
 
-    expect( givenAt.value ).toMatch( '2018-01-02' );
-    givenAt.value = '01/01/2018';
-    expect( givenAt.value ).isNullOrEmpty();
-    givenAt.value = -1.99;
-    expect( givenAt.value ).isNullOrEmpty();
+    expect( dobAt.value ).toMatch( '2018-01-02' );
+    dobAt.value = '01/01/2018';
+    expect( dobAt.value ).isNullOrEmpty();
+    dobAt.value = -1.99;
+    expect( dobAt.value ).isNullOrEmpty();
 } );

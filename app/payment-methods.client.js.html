@@ -6,6 +6,11 @@
 // log that the file has been reached
 code.log( 'payment-methods.client.js loaded.' );
 
+// elements on this page
+code.mainForm = document.getElementById( 'manage-payment-methods-form' );
+code.paymentMethods = document.getElementById( 'payment-methods' );
+code.deleteBtn = document.getElementById( 'delete' );
+
 code.clearAllFields = function() {
 
     // clear the fields
@@ -43,8 +48,8 @@ code.validateInput = function() {
      if the count of the matches > 0, then present the confirm() dialog and only continue if positive
      */
      var okToAdd = possibleDupeIds.length > 0 ?
-     confirm( 'A payment method with the name "' + name + '" already exists; do you still ' +
-     'want to add it?' ) :
+     confirm( 'A payment method with the name "' + name +
+     '" already exists; do you still want to add it?' ) :
      true;
 
      code.log( 'validateInput(); error: ' + error );
@@ -111,72 +116,81 @@ code.saveResult = function( result ) {
 /**
 * . Handles when the form is submitted.
 */
-document.getElementById( 'manage-payment-methods-form' )
-.addEventListener( 'submit', function( event ) {
-      event.preventDefault();
+if ( code.isNullOrEmpty( code.mainForm ) === false ) {
+  code.mainForm.addEventListener( 'submit', function( event ) {
+        event.preventDefault();
 
-      // validate the form input
-      if ( code.validateInput() === false ) {
-        return false;
-      }
-
-      // show the spinner
-      code.showSpinner();
-
-      // get all headers which will also be the IDs of all inputs
-      google.script.run.withSuccessHandler( code.prepareSaveData )
-      .getHeaders( 'payment-methods' );
-  } );
-
-/**
-* . Handles when the <select> for payment methods is changed.
-*/
-document.getElementById( 'payment-methods' ).onchange = function( event ) {
-     var userId = event.target.value;
-
-     // show the spinner
-     code.showSpinner();
-
-     // clear all fields
-     code.clearAllFields();
-
-     code.log( '#payment-methods (change): about to get payment-methods object #' + userId );
-
-     // asynchronously get the user details and fill the <select> menu
-     google.script.run.withSuccessHandler( code.fillDetails )
-     .withFailureHandler( code.getObjectFailed )
-     .getObject( 'payment-methods', userId );
-};
-
-document.getElementById( 'delete' ).addEventListener( 'click', function( event ) {
-
-      // get the current user id
-      var userId = code.getValue( 'payment-methods' );
-
-      if ( code.isNullOrEmptySpace( userId ) === true ) {
-        return false;
-      }
-
-      // only proceed once you have confirmation
-      if ( confirm( 'Are you sure you want to delete this payment method?' ) === true ) {
+        // validate the form input
+        if ( code.validateInput() === false ) {
+          return false;
+        }
 
         // show the spinner
         code.showSpinner();
 
-        // disable the delete button
-        code.disable( 'delete' );
+        // get all headers which will also be the IDs of all inputs
+        google.script.run.withSuccessHandler( code.prepareSaveData )
+        .getHeaders( 'payment-methods' );
+    } );
+}
 
-        // delete the data for the current user
-        google.script.run.withSuccessHandler( code.saveResult )
-        .deleteData( 'payment-methods', userId );
-      }
+
+/**
+* . Handles when the <select> for payment methods is changed.
+*/
+if ( code.isNullOrEmpty( code.paymentMethods ) === false ) {
+  code.paymentMethods.onchange = function( event ) {
+       var userId = event.target.value;
+
+       // show the spinner
+       code.showSpinner();
+
+       // clear all fields
+       code.clearAllFields();
+
+       code.log( '#payment-methods (change): about to get payment-methods object #' + userId );
+
+       // asynchronously get the user details and fill the <select> menu
+       google.script.run.withSuccessHandler( code.fillDetails )
+       .withFailureHandler( code.getObjectFailed )
+       .getObject( 'payment-methods', userId );
+  };
+}
+
+if ( code.isNullOrEmpty( code.deleteBtn ) === false ) {
+  code.deleteBtn.addEventListener( 'click', function() {
+
+        // get the current user id
+        var userId = code.getValue( 'payment-methods' );
+
+        if ( code.isNullOrEmptySpace( userId ) === true ) {
+          return false;
+        }
+
+        // only proceed once you have confirmation
+        if ( confirm( 'Are you sure you want to delete this payment method?' ) === true ) {
+
+          // show the spinner
+          code.showSpinner();
+
+          // disable the delete button
+          code.disable( 'delete' );
+
+          // delete the data for the current user
+          google.script.run.withSuccessHandler( code.saveResult )
+          .deleteData( 'payment-methods', userId );
+        }
   } );
+}
+
 
 /**
 * . Code that loads on page load
 */
-google.script.run.withSuccessHandler( code.addPaymentMethodsHtml )
-.fillPaymentMethodsPicker();
+if ( google && google.script && google.script.run ) {
+    google.script.run.withSuccessHandler( code.addPaymentMethodsHtml )
+    .fillPaymentMethodsPicker();
+}
 
 // confirms whether the user is sure if they want to complete the given action
 } )( window.code = window.code || {},

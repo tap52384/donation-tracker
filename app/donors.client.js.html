@@ -6,6 +6,10 @@
 // log that the file has been reached
 code.log( 'donors.client.js loaded.' );
 
+// elements on this page
+code.mainForm = document.getElementById( 'manage-donors-form' );
+code.deleteButton = document.getElementById( 'delete' );
+
 /**
   *  Add the years to the select menu.
   */
@@ -46,7 +50,6 @@ code.log( 'donors.client.js loaded.' );
     google.script.run.withSuccessHandler( code.addUsersHtml )
     .fillUsersPicker();
 
-    // document.getElementById('manage-donors-form').reset();
     return true;
   };
 
@@ -172,55 +175,62 @@ code.log( 'donors.client.js loaded.' );
      .getObject( 'donors', userId );
   };
 
-  document.getElementById( 'manage-donors-form' ).addEventListener( 'submit', function( event ) {
-      event.preventDefault();
+  if ( code.isNullOrEmpty( code.mainForm ) === false ) {
+    code.mainForm.addEventListener( 'submit', function( event ) {
+        event.preventDefault();
 
-      // validate the form input
-      if ( code.validateInput() === false ) {
-        code.log( 'submit(); validate input failed.' );
-        return false;
-      }
-
-      // show the spinner
-      code.showSpinner();
-
-      // get all headers which will also be the IDs of all inputs
-      google.script.run.withSuccessHandler( code.prepareSaveData )
-      .getHeaders( 'donors' );
-  } );
-
-  document.getElementById( 'delete' ).addEventListener( 'click', function( event ) {
-
-      // get the current user id
-      var userId = code.getValue( 'users' );
-
-      if ( code.isNullOrEmptySpace( userId ) === true ) {
-        return false;
-      }
-
-      // only proceed once you have confirmation
-      if ( confirm( 'Are you sure you want to delete this donor?' ) === true ) {
+        // validate the form input
+        if ( code.validateInput() === false ) {
+          code.log( 'submit(); validate input failed.' );
+          return false;
+        }
 
         // show the spinner
         code.showSpinner();
 
-        // disable the delete button
-        code.disable( 'delete' );
+        // get all headers which will also be the IDs of all inputs
+        google.script.run.withSuccessHandler( code.prepareSaveData )
+        .getHeaders( 'donors' );
+    } );
+  }
 
-        // delete the data for the current user
-        google.script.run.withSuccessHandler( code.saveResult )
-        .deleteData( 'donors', userId );
-      }
-  } );
+  if ( code.isNullOrEmpty( code.deleteButton ) === false ) {
+    code.deleteButton.addEventListener( 'click', function() {
 
-  // https://developers.google.com/apps-script/guides/html/communication#success_handlers
-  // fills in the select menu that allows the user to choose the year
-  // it defaults to the current year
-  google.script.run.withSuccessHandler( code.addStateHtml )
-  .fillStatePicker();
+        // get the current user id
+        var userId = code.getValue( 'users' );
 
-  google.script.run.withSuccessHandler( code.addUsersHtml )
-  .fillUsersPicker();
+        if ( code.isNullOrEmptySpace( userId ) === true ) {
+          return false;
+        }
+
+        // only proceed once you have confirmation
+        if ( confirm( 'Are you sure you want to delete this donor?' ) === true ) {
+
+          // show the spinner
+          code.showSpinner();
+
+          // disable the delete button
+          code.disable( 'delete' );
+
+          // delete the data for the current user
+          google.script.run.withSuccessHandler( code.saveResult )
+          .deleteData( 'donors', userId );
+        }
+    } );
+  }
+
+  if ( google && google.script && google.script.run ) {
+
+    // https://developers.google.com/apps-script/guides/html/communication#success_handlers
+    // fills in the select menu that allows the user to choose the year
+    // it defaults to the current year
+    google.script.run.withSuccessHandler( code.addStateHtml )
+    .fillStatePicker();
+
+    google.script.run.withSuccessHandler( code.addUsersHtml )
+    .fillUsersPicker();
+  }
 
 code.log( 'donors code completed.' );
 
