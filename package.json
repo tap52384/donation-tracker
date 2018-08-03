@@ -4,7 +4,7 @@
   "description": "Google Docs add-on for tracking donations",
   "main": "Code.js",
   "scripts": {
-    "test": "cp pre-commit .git/hooks/pre-commit && jest --verbose --notify --colors"
+    "test": "cp pre-commit .git/hooks/pre-commit && jest --notify --colors"
   },
   "repository": {
     "type": "git",

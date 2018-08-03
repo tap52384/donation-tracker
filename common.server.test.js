@@ -1,4 +1,4 @@
-/* eslint-env jest, es6 */
+/* eslint-env jest, es6, node */
 
 const code = require( './app/common.server' );
 

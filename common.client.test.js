@@ -1,4 +1,4 @@
-/* eslint-env jest, es6 */
+/* eslint-env jest, es6, node */
 
 // creates an empty DOM to be used to create global window and document objects
 const jsdom = require( 'jsdom' );

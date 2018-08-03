@@ -1,4 +1,4 @@
-/* eslint-env jest, es6 */
+/* eslint-env jest, es6, node */
 
 // loads the necessary node packages
 const jsdom = require( 'jsdom' );

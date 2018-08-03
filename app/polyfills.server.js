@@ -82,3 +82,14 @@ String.prototype.endsWith = String.prototype.endsWith || function( search, thisL
 		}
 		return this.substring( thisLen - search.length, thisLen ) === search;
 };
+
+/**
+ * Returns only the date portion of the ISO-formatted date string.
+ * @return {string} [description]
+ */
+Date.prototype.toISODateString =
+Date.prototype.toISODateString || function() {
+    var string = this.toISOString();
+    var format = 'YYYY-MM-DD';
+    return string.substring( 0, format.length );
+};

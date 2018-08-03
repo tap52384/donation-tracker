@@ -9,37 +9,18 @@
 
   <div class="form-group">
     <label for="donor_id">Donor</label>
-    <select class="form-control google-full-width" id="donor_id" name="donor_id" autocomplete="off" required>
+    <select class="form-control google-full-width" id="donor_id"
+    name="donor_id" autocomplete="off" required>
       <option value="">Loading...</option>
     </select>
   </div> <!-- /.form-group -->
-
-  <!-- <div class="display-none" id="new-donor-info">
-  <div class="inline form-group">
-    <label for="firstname">First Name</label>
-    <input type="text" class="form-control" id="firstname" name="firstname" autocomplete="off" />
-  </div>
-  <div class="inline form-group">
-    <label for="mi">M.I.</label>
-    <input type="text" class="form-control" id="mi" name="mi" autocomplete="off" maxlength="1" size="3" />
-  </div>
-  <div class="inline form-group">
-    <label for="lastname">Last Name</label>
-    <input type="text" class="form-control" id="lastname" name="lastname" autocomplete="off" />
-  </div>
-  <div class="inline form-group">
-    <label for="suffix">Suffix</label>
-    <input type="text" class="form-control" id="suffix" name="suffix" autocomplete="off" size="5" />
-  </div>
-
-  </div>  -->
-  <!-- /.new-donor-info -->
 
   <br />
 
   <div class="form-group">
     <label for="paymentmethod_id">Payment Method</label>
-    <select class="form-control google-full-width" id="paymentmethod_id" name="paymentmethod_id" autocomplete="off" required>
+    <select class="form-control google-full-width" id="paymentmethod_id"
+    name="paymentmethod_id" autocomplete="off" required>
       <option value="">Loading...</option>
     </select>
   </div> <!-- /.form-group -->
@@ -47,7 +28,8 @@
 
   <div class="form-group">
     <label for="donationtype_id">Donation Type</label>
-    <select class="form-control google-full-width" id="donationtype_id" name="donationtype_id" autocomplete="off" required>
+    <select class="form-control google-full-width" id="donationtype_id"
+    name="donationtype_id" autocomplete="off" required>
       <option value="">Loading...</option>
     </select>
   </div> <!-- /.form-group -->
@@ -55,8 +37,9 @@
 
   <div class="form-group">
     <label for="amount">Amount</label>
-    <input type="number" class="form-control google-full-width" id="amount" name="amount" autocomplete="off"
-    placeholder="0000.00" step="0.01" min="0" required />
+    <input type="number" class="form-control google-full-width"
+    id="amount" name="amount" autocomplete="off"
+    placeholder="0000.00" step="0.01" min="0.00" required />
   </div>
   <br />
 
@@ -70,27 +53,36 @@
       <input type="radio" name="radio-a" id="date-given-custom" />
       <label for="date-given-custom">Custom Date</label>
     </div>
-    <input type="date" id="given_at" name="given_at" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" placeholder="yyyy-mm-dd"
-     class="form-control google-full-width" autocomplete="off" required />
+    <input type="date" id="given_at" name="given_at" step="1"
+    min="1970-01-01" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"
+    placeholder="yyyy-mm-dd" class="form-control google-full-width"
+    autocomplete="off" required />
   </div>
 
   <br />
 
   <div>
     <div class="half-width-div">
-      <button type="submit" id="submit" name="submit" class="btn btn-success form-control google-full-width action" autocomplete="off">Save</button>
+      <button type="submit" id="submit" name="submit"
+      class="btn btn-success form-control google-full-width action"
+      autocomplete="off">Save</button>
     </div>
     <div class="half-width-div">
-      <button type="button" id="reset" name="reset" class="btn btn-primary form-control google-full-width" autocomplete="off">Reset</button>
+      <button type="button" id="reset" name="reset"
+      class="btn btn-primary form-control google-full-width"
+      autocomplete="off">Reset</button>
     </div>
   </div>
 
   <br />
 
   <div class="form-group">
-  <button type="button" id="add-donor" name="add-donor" class="btn btn-primary btn-block" autocomplete="off">Add New Donor</button>
-  <button type="button" id="add-payment-method" name="add-payment-method" class="btn btn-primary btn-block" autocomplete="off">Add New Payment Method</button>
-  <button type="button" id="add-donation-type" name="add-donation-type" class="btn btn-primary btn-block" autocomplete="off">Add New Donation Type</button>
+  <button type="button" id="add-donor" name="add-donor"
+  class="btn btn-primary btn-block" autocomplete="off">Add New Donor</button>
+  <button type="button" id="add-payment-method" name="add-payment-method"
+  class="btn btn-primary btn-block" autocomplete="off">Add New Payment Method</button>
+  <button type="button" id="add-donation-type" name="add-donation-type"
+  class="btn btn-primary btn-block" autocomplete="off">Add New Donation Type</button>
 </div>
 
 <br />
