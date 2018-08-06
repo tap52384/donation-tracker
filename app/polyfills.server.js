@@ -1,3 +1,6 @@
+/* eslint-env node */
+/* global SpreadsheetApp, ScriptApp, DriveApp, PropertiesService, Logger, HtmlService */
+
 // Production steps of ECMA-262, Edition 5, 15.4.4.14
 // Reference: http://es5.github.io/#x15.4.4.14
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf
@@ -84,7 +87,8 @@ String.prototype.endsWith = String.prototype.endsWith || function( search, thisL
 };
 
 /**
- * Returns only the date portion of the ISO-formatted date string.
+ * Returns only the date portion of the ISO-formatted date string
+ * formatted at YYYY-MM-DD.
  * @return {string} [description]
  */
 Date.prototype.toISODateString =

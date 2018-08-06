@@ -1,5 +1,5 @@
-/* eslint-env browser */
-/* global SpreadsheetApp, ScriptApp, PropertiesService, Logger, HtmlService */
+/* eslint-env node */
+/* global SpreadsheetApp, ScriptApp, DriveApp, PropertiesService, Logger, HtmlService */
 
 /**
 * . Code that handles menus and add-on installation.

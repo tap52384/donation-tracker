@@ -1,3 +1,6 @@
+/* eslint-env node */
+/* global SpreadsheetApp, ScriptApp, DriveApp, PropertiesService, Logger, HtmlService */
+
 function fillPaymentMethodsPicker( showTrashed ) {
   var filename = 'payment-methods';
   var headers = getHeaders( filename );

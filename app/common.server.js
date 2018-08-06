@@ -1,23 +1,7 @@
-/* eslint-env browser */
-/* global SpreadsheetApp, ScriptApp, DriveApp, PropertiesService, Logger, HtmlService */
+/* eslint-env node */
+/* global SpreadsheetApp, ScriptApp, DriveApp, PropertiesService, Logger,
+HtmlService, Utilities */
 
-/**
- * This creates an object named "code" that will add all functions as properties
- * (remember that functions are technically variables) that will be used for
- * testing.
- * @param  {[type]} module [description]
- * @return {[type]}        [description]
- */
-if ( typeof( module ) !== 'undefined' && module.exports ) {
-    var code = {};
-    code.isNullOrEmpty = isNullOrEmpty;
-    code.isNullOrEmptySpace = isNullOrEmptySpace;
-    code.isDateColumn = isDateColumn;
-    code.titleCase = titleCase;
-
-    // exposes the code so that Jest can test it
-    module.exports = code;
-}
 
 /**
  * [isBrowser description]
@@ -25,8 +9,9 @@ if ( typeof( module ) !== 'undefined' && module.exports ) {
  */
 function isBrowser() {
    return typeof( window ) !== 'undefined' &&
+   typeof document !== 'undefined' &&
    isNullOrEmpty( window ) === false &&
-     isNullOrEmpty( document ) === false;
+   isNullOrEmpty( document ) === false;
 }
 
 /**
@@ -83,10 +68,12 @@ function getObject( filename, rowId ) {
         // https://developers.google.com/apps-script/guides/html/reference/run#myFunction(...)
         // https://developers.google.com/apps-script/reference/utilities/utilities#formatdatedate-timezone-format
       if ( isDateColumn( header ) === true && typeof value === typeof new Date() ) {
-         log( 'getObject(); ' + header + ' is a Date object ' + value + '; converting to string...' );
+         log( 'getObject(); ' + header + ' is a Date object ' + value +
+         '; converting to string...' );
 
          // https://developers.google.com/apps-script/reference/utilities/utilities#formatdatedate-timezone-format
-         value = Utilities.formatDate( value, 'GMT', 'yyyy-MM-dd' ); // "yyyy-MM-dd mm:hh:ss a"
+         // "yyyy-MM-dd mm:hh:ss a"
+         value = Utilities.formatDate( value, 'GMT', 'yyyy-MM-dd' );
         log( 'getObject(); formatDate value: ' + value );
       }
 
@@ -364,7 +351,8 @@ function setIdFmt( sheet, header, columnLetter ) {
   // Multiple COUNTIF for combining criteria
   // https://www.ablebits.com/office-addins-blog/2017/06/29/countif-google-sheets/
   // =AND(ISNUMBER(A1), COUNTIF($A:$A,"="&A1) + COUNTIF($A:$A,"<=0") < 2)
-  var formula = '=COUNTIF($' + columnLetter + ':$' + columnLetter + ',"="&' + columnLetter + '1) + ' +
+  var formula = '=COUNTIF($' + columnLetter + ':$' + columnLetter + ',"="&' +
+  columnLetter + '1) + ' +
     'COUNTIF($' + columnLetter + ':$' + columnLetter + ',"<=0") < 2';
   var args = [ formula ];
 
@@ -484,6 +472,91 @@ function initializeFile( spreadsheet, headers ) {
   sheet.setFrozenRows( 1 );
 
   return spreadsheet;
+}
+
+/**
+* . Get the letter representing the column no matter the numerical
+* . index (24 or 404).
+* . @returns string
+*/
+function getColumnLetter( index ) {
+ var alphas = getAlphabet();
+ var numAlphas = alphas.length;
+ var output = '';
+
+ var quotient = Math.floor( index / numAlphas );
+ var remainder = index % numAlphas;
+ var power = getColumnLetterPower( index );
+
+  // the answer has to do with powers
+  // 26^0 to 26^1 = 1 character
+  // 26^1 to 26^2 = 2 characters
+  for ( var i = 1; i < power; i++ ) {
+     var quotient = Math.floor( index / ( Math.pow( numAlphas, i ) ) );
+     output += alphas[ quotient - 1 ];
+  }
+
+  output += alphas[ remainder - 1 ];
+
+  return output;
+}
+
+/**
+ * [getAlphabet description]
+ * @return {array} [description]
+ */
+function getAlphabet() {
+ return [
+   'a',
+   'b',
+   'c',
+   'd',
+   'e',
+   'f',
+   'g',
+   'h',
+   'i',
+   'j',
+   'k',
+   'l',
+   'm',
+   'n',
+   'o',
+   'p',
+   'q',
+   'r',
+   's',
+   't',
+   'u',
+   'v',
+   'w',
+   'x',
+   'y',
+   'z'
+ ];
+}
+
+/**
+* . Used to determine how many characters are in the column
+* . name. For example, the first column has 1, the 29th
+* . has 2, and the
+* . @returns int
+* . TODO: technically, this function is not correct
+* . 26^1 = 26 (one character)
+* . 26^1 + 1 = 27 (two characters)
+* . 26^2 + 26 = (three characters)
+* . 26^3 + 26 + (four characters)
+*/
+function getColumnLetterPower( index ) {
+  var alphas = getAlphabet();
+  var numAlphas = alphas.length;
+  var power = 1;
+
+  while ( index > Math.pow( numAlphas, power ) ) {
+    power = power + 1;
+  }
+
+  return power;
 }
 
 /**
@@ -642,6 +715,38 @@ function isNullOrEmpty( x ) {
 function isNullOrEmptySpace( x ) {
     return isNullOrEmpty( x ) || typeof x.trim === 'function' &&
     isNullOrEmpty( x.trim().replace( / /g, '' ) );
+}
+
+/**
+ * [printProperties description]
+ * @param  {[type]} obj [description]
+ * @return {[type]}     [description]
+ */
+function printProperties( obj ) {
+
+    // stop here if the object is empty
+    if ( isEmptyObject( obj ) === true ) {
+        log( 'The specified object does not have any properties.' );
+        return;
+    }
+
+    log( 'specified object is not empty: ' + obj );
+
+    Object.getOwnPropertyNames( obj ).forEach(
+        function( val ) {
+
+            // if an object, call this object recursively?
+            var type = Object.prototype.toString.call( obj[ val ] );
+
+            if ( type === '[object Object]' ||
+            type.indexOf( '[object' ) !== -1 ) {
+                log( val + ':' );
+                printProperties( obj[ val ] );
+            }
+
+            log( val + ' -> ' + obj[ val ] );
+        }
+    );
 }
 
 /**
@@ -953,10 +1058,118 @@ function titleCase( str ) {
  * @return {[type]}       [description]
  */
 function log( text, error ) {
-    Logger.log( text );
-    console.log( text );
-    if ( error === true ) {
+    if ( Logger && Logger.log ) {
+        Logger.log( text );
+    }
+    if ( console ) {
+        if ( error === true && console.error ) {
+            console.error( text );
+        }
+        console.log( text );
+    }
+    if ( error === true && SpreadsheetApp &&
+      SpreadsheetApp.getUi ) {
        SpreadsheetApp.getUi().alert( text );
     }
     return error === true;
+}
+
+/**
+* . Given an array of headers in a given file, give the
+* . numeric column index (1-based).
+* @returns int
+*/
+function getColumnIndex( headers, name ) {
+   if ( headers === null || headers.length === 0 ||
+       isNullOrEmptySpace( name ) === true ) {
+      return -1;
+   }
+
+   var count = headers.length;
+
+  for ( var i = 0; i < count; i++ ) {
+    if ( headers[ i ].toLowerCase() === name.toLowerCase() ) {
+      return i + 1;
+    }
+  }
+  return -1;
+}
+
+/**
+ * Each file has column headers. This function returns the array of column
+ * headers for each file type. The headers themselves follow a few conventions:
+ * Every header ending in '_ID' is a number representing a row ID. Every header
+ * ending in '_AT' is a date/time. All dates are handled the same.
+ * @param  {[type]} name [description]
+ * @return {[type]}      [description]
+ */
+function getHeaders( name ) {
+  if ( isNullOrEmptySpace( name ) === true ) {
+     return [];
+  }
+
+  if ( name.toLowerCase() === 'donations' ) {
+     return getDonationsHeaders();
+  }
+
+  if ( name.toLowerCase() === 'donation-types' ) {
+     return getDonationTypesHeaders();
+  }
+
+  if ( name.toLowerCase() === 'donors' ) {
+     return getDonorsHeaders();
+  }
+
+  if ( name.toLowerCase() === 'payment-methods' ) {
+     return getPaymentMethodsHeaders();
+  }
+
+  return [];
+}
+
+/**
+ * This creates an object named "code" that will add all functions as properties
+ * (remember that functions are technically variables) that will be used for
+ * testing.
+ * @param  {[type]} module [description]
+ * @return {[type]}        [description]
+ */
+if ( typeof( module ) !== 'undefined' && module.exports ) {
+    console.log( 'module.isNullOrEmpty: ' +
+    ( typeof module.isNullOrEmpty !== 'undefined' ? 'true' : 'false' ) );
+    console.log( 'global.isNullOrEmpty: ' +
+    ( typeof global.isNullOrEmpty !== 'undefined' ? 'true' : 'false' ) );
+    console.log( 'this.isNullOrEmpty: ' +
+    ( typeof this.isNullOrEmpty !== 'undefined' ? 'true' : 'false' ) );
+    console.log( 'isNullOrEmpty: ' +
+    ( typeof isNullOrEmpty !== 'undefined' ? 'true' : 'false' ) );
+
+    // module.exports exposes any functions so they can be used
+    // when this file is required as a module
+    module.exports = {
+        'deleteData': deleteData,
+        'fillPicker': fillPicker,
+        'getAllData': getAllData,
+        'getActualDataRange': getActualDataRange,
+        'getCellValues': getCellValues,
+        'getColumnIndex': getColumnIndex,
+        'getFileByFilename': getFileByFilename,
+        'getHeaders': getHeaders,
+        'getNextId': getNextId,
+        'getObject': getObject,
+        'getSortArray': getSortArray,
+        'getValidOrder': getValidOrder,
+        'hasProperty': hasProperty,
+        'isBrowser': isBrowser,
+        'isDateColumn': isDateColumn,
+        'isNullOrEmpty': isNullOrEmpty,
+        'isNullOrEmptySpace': isNullOrEmptySpace,
+        'log': log,
+        'printProperties': printProperties,
+        'saveData': saveData,
+        'setCurrencyFmt': setCurrencyFmt,
+        'setEmailFmt': setEmailFmt,
+        'titleCase': titleCase
+
+    };
 }

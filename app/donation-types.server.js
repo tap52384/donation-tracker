@@ -1,3 +1,6 @@
+/* eslint-env node */
+/* global SpreadsheetApp, ScriptApp, DriveApp, PropertiesService, Logger, HtmlService */
+
 function fillDonationTypesPicker( showTrashed ) {
   var filename = 'donation-types';
 

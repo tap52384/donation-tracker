@@ -1,3 +1,6 @@
+/* eslint-env node */
+/* global SpreadsheetApp, ScriptApp, DriveApp, PropertiesService, Logger, HtmlService */
+
 /**
 * . Creates the required "donors" spreadsheet if it doesn't already exist.
 * . In Google Sheets, a "spreadsheet" represents the entire file.

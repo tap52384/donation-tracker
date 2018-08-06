@@ -32,7 +32,6 @@ test( 'verifies document is available before loading DOM...', () => {
     expect( document !== undefined && document !== null ).toBe( true );
 } );
 
-
 test( 'verifies that the DOM is not null', () => {
     expect( dom ).not.toBe( null );
 } );
