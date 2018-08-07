@@ -1,6 +1,7 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
   <head>
+    <meta charset="utf-8" />
     <base target="_top">
 
     <!-- include the CSS for Twitter Bootstrap 3.3.7 if enabled -->
@@ -35,7 +36,8 @@
   <!-- include the JS for Twitter Bootstrap 3.3.7 if enabled -->
   <? if (data.useBootstrap) { ?>
   <!-- Latest compiled and minified JavaScript -->
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+  integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js"></script>
 
@@ -48,7 +50,16 @@
   <!-- javascript common to all pages -->
   <!-- client-size (browser) javascript common to all pages -->
   <!-- use google.script.run to call server-side functions -->
-  <script><?!= include('common.client'); ?></script>
+  <script>
+  <?!= includeJS( 'common.client.js' ); ?>
+  </script>
+
+  <!-- page specific javascript, if applicable -->
+  <script>
+  <?!=
+    isNullOrEmptySpace(data.js) === true ? '' : includeJS(data.js);
+  ?>
+  </script>
 
   </body>
 </html>

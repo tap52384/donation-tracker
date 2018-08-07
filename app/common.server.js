@@ -2,9 +2,12 @@
 /* global SpreadsheetApp, ScriptApp, DriveApp, PropertiesService, Logger,
 HtmlService, Utilities */
 
-console.log( '__dirname: ' + __dirname );
-require( __dirname + '/polyfills.server.js' );
-require( __dirname + '/enums.js' );
+if ( typeof __dirname !== 'undefined' ) {
+  console.log( '__dirname: ' + __dirname );
+  require( __dirname + '/polyfills.server.js' );
+  require( __dirname + '/enums.js' );
+}
+
 
 /**
  * [isBrowser description]

@@ -95,7 +95,7 @@ function onInstall( e ) {
 function manageDonors() {
 
    // type HtmlOutput
-   var html = extendTemplate( 'base', 'donors', 'customcss', 'donors.client' );
+   var html = extendTemplate( 'base', 'donors', 'customcss', 'donors.client.js' );
 
    // Ui
    SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
@@ -106,7 +106,7 @@ function manageDonors() {
 function manageDonations() {
 
   // HtmlOutput
-  var html = extendTemplate( 'base', 'donations', 'customcss', 'donations.client' );
+  var html = extendTemplate( 'base', 'donations', 'customcss', 'donations.client.js' );
 
   // Ui
    SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
@@ -117,7 +117,7 @@ function manageDonations() {
 function manageDonationTypes() {
 
   // HtmlOutput
-  var html = extendTemplate( 'base', 'donation-types', 'customcss', 'donation-types.client' );
+  var html = extendTemplate( 'base', 'donation-types', 'customcss', 'donation-types.client.js' );
 
   // Ui
    SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
@@ -128,7 +128,7 @@ function manageDonationTypes() {
 function managePaymentMethods() {
 
   // HtmlOutput
-  var html = extendTemplate( 'base', 'payment-methods', 'customcss', 'payment-methods.client' );
+  var html = extendTemplate( 'base', 'payment-methods', 'customcss', 'payment-methods.client.js' );
 
   // Ui
    SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
@@ -147,6 +147,19 @@ function include( filename ) {
     return isNullOrEmptySpace( filename ) ?
     '' :
     HtmlService.createHtmlOutputFromFile( filename ).getContent();
+}
+
+/**
+ * Function for including client-side JavaScript files.
+ * Their filenames end in .client.js.html but only include
+ * JavaScript. This allows the files to ready for unit tests.
+ * @param  {[type]} filename [description]
+ * @return {[type]}          [description]
+ */
+function includeJS( filename ) {
+    return isNullOrEmptySpace( filename ) ?
+    '' :
+    HtmlService.createTemplateFromFile( filename ).getRawContent();
 }
 
 /**
