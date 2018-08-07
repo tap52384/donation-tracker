@@ -2,6 +2,9 @@
 /* global SpreadsheetApp, ScriptApp, DriveApp, PropertiesService, Logger,
 HtmlService, Utilities */
 
+console.log( '__dirname: ' + __dirname );
+require( __dirname + '/polyfills.server.js' );
+require( __dirname + '/enums.js' );
 
 /**
  * [isBrowser description]
@@ -15,6 +18,48 @@ function isBrowser() {
 }
 
 /**
+ * Retrieves the name of the function for logging purposes.
+ * @param  {function|arguments} obj A function or its arguments.
+ * @return {string}
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/arguments|MDN}
+ */
+function getFnName( obj ) {
+    if ( isNullOrEmpty( obj ) === true ) {
+        return '';
+    }
+
+    if ( obj && obj.callee && obj.callee.name ) {
+        return obj.callee.name;
+    }
+
+    // Match:
+    // - ^          the beginning of the string
+    // - function   the word 'function'
+    // - \s+        at least some white space
+    // - ([\w\$]+)  capture one or more valid JavaScript identifier characters
+    // - \s*        optionally followed by white space (in theory there won't
+    //              be any here, so if performance is an issue this can be
+    //              omitted[1]
+    // - \(         followed by an opening brace
+    //
+    var result = /^function\s+([\w\$]+)\s*\(/.exec( obj.toString() );
+
+    // for an anonymous function there
+    // won't be a match
+    return  result  ?  result[ 1 ]  :  '';
+}
+
+/**
+ * Returns true if the object is a string.
+ * @param  {[type]}  s [description]
+ * @return {Boolean}   [description]
+ */
+function isValidStringObject( s ) {
+    return isNullOrEmpty( s ) === false &&
+    Object.prototype.toString.call( s ) === '[object String]';
+};
+
+/**
 * . Returns a single row of data as an associative array of values
 * . where the column names are the keys for the specific object.
 * . @param  string filename
@@ -23,14 +68,24 @@ function isBrowser() {
 */
 function getObject( filename, rowId ) {
 
+  // empty case: no row ID specified
+  if ( isNullOrEmptySpace( rowId ) === true ) {
+      log( 'no row id specified: ' + rowId, true, arguments );
+      return {};
+  }
+
+  // only attempt to retrieve the data if a row ID is specified
   var data = getAllData( filename );
 
-  // empty case: no row ID specified
-  if ( isNullOrEmptySpace( rowId ) === true ||
-     data === null ) {
-    log( 'getObject(); no object was returned. rowId: ' + rowId +
-        ' data is null? ' + ( data === null ? 'true' : 'false' ) );
-     return {};
+  // empty case: the file does not exist or the file
+  // is empty
+  if ( data === null ) {
+      log(
+          'no object was returned for rowId "' + rowId + '"',
+          false,
+          arguments
+      );
+      return {};
   }
 
   var rowCount = data.getNumRows();
@@ -52,14 +107,14 @@ function getObject( filename, rowId ) {
        continue;
     }
 
-    log( 'getObject(); found the row for userId ' + rowId );
+    log( 'found the row for userId ' + rowId, false, arguments );
 
     for ( var key in headers ) {
         var header = headers[ key ];
         var colIndex = getColumnIndex( headers, header );
         var value = data.getCell( row, colIndex ).getValue();
 
-      log( 'getObject(); current header: ' + header );
+      log( 'current header: ' + header, false, arguments );
 
         // dates cannot be returned with success handlers for some reason
         // was able to confirm that Date objects are not handled properly.
@@ -68,8 +123,8 @@ function getObject( filename, rowId ) {
         // https://developers.google.com/apps-script/guides/html/reference/run#myFunction(...)
         // https://developers.google.com/apps-script/reference/utilities/utilities#formatdatedate-timezone-format
       if ( isDateColumn( header ) === true && typeof value === typeof new Date() ) {
-         log( 'getObject(); ' + header + ' is a Date object ' + value +
-         '; converting to string...' );
+         log( header + ' is a Date object ' + value +
+         '; converting to string...', false, arguments );
 
          // https://developers.google.com/apps-script/reference/utilities/utilities#formatdatedate-timezone-format
          // "yyyy-MM-dd mm:hh:ss a"
@@ -86,53 +141,56 @@ function getObject( filename, rowId ) {
     break;
   }
 
-  log( 'getObject(); row ' + rowId + ' of ' + filename + ': ' +
-  JSON.stringify( object ) );
+  log(
+      'row ' + rowId + ' of ' + filename + ': ' + JSON.stringify( object ),
+      false,
+      arguments
+  );
   return object;
 }
 
 /**
  * Returns true if the specified header name ends in "_AT," which indicates
- * it is a date column.
- * @param  {[type]}  header [description]
- * @return {Boolean}        [description]
+ * it is a date column. Case-sensitive.
+ * @param  {string}  header [description]
+ * @return {Boolean}
  */
 function isDateColumn( header ) {
-   return isNullOrEmptySpace( header ) === false &&
+   return isValidStringObject( header ) === true &&
    header.endsWith( '_AT' ) === true;
 }
 
 /**
-* . Returns a single row of data as an associative array of values
-* . where the column names are the keys for the specific object.
-* . @param  string filename
-* . @param  int    rowId
-* . @return object
+* Returns a single row of data as an associative array of values
+* where the column names are the keys for the specific object.
+* @param  string filename
+* @param  int    rowId
+* @return object
 */
-function getObject2( filename, rowId ) {
-
-  // 1. Get the first sheet of the specified Spreadsheet
-  var spreadsheet = getFileByFilename( filename );
-  var sheet = spreadsheet.getSheets()[ 0 ];
-
-  // 2. The ID is always in the first column. Search just
-  // that column for the value. When it's found, return the 1-based
-  // row number
-  // Offset should skip the first row (row with the column headers)
-  var column = sheet.getRange( 'A:A' ).offset( 1, 0 );
-
-  // https://developers.google.com/apps-script/reference/spreadsheet/range#getValues()
-  var values = column.getValues();
-  var rowCount = values.length;
-
-  // 3. Using the values in the column, loop until you find the
-  // value you are looking for.
-  for ( var row = 1; row <= rowCount; row++ ) {
-
-  }
-
-  return {};
-}
+// function getObject2( filename, rowId ) {
+//
+//   // 1. Get the first sheet of the specified Spreadsheet
+//   var spreadsheet = getFileByFilename( filename );
+//   var sheet = spreadsheet.getSheets()[ 0 ];
+//
+//   // 2. The ID is always in the first column. Search just
+//   // that column for the value. When it's found, return the 1-based
+//   // row number
+//   // Offset should skip the first row (row with the column headers)
+//   var column = sheet.getRange( 'A:A' ).offset( 1, 0 );
+//
+//   // https://developers.google.com/apps-script/reference/spreadsheet/range#getValues()
+//   var values = column.getValues();
+//   var rowCount = values.length;
+//
+//   // 3. Using the values in the column, loop until you find the
+//   // value you are looking for.
+//   for ( var row = 1; row <= rowCount; row++ ) {
+//
+//   }
+//
+//   return {};
+// }
 
 /**
  * Returns the data range for the specified file, skipping the first row which
@@ -144,8 +202,10 @@ function getActualDataRange( filename ) {
    var spreadsheet = getFileByFilename( filename );
 
   if ( spreadsheet === null ) {
-     log( 'getActualDataRange(); the spreadsheet ' + filename +
-     ' was not found or loaded...' );
+     log( 'the spreadsheet ' + filename + ' was not found or loaded...',
+        false,
+        arguments
+     );
      return null;
   }
 
@@ -197,6 +257,11 @@ function getFileByFilename( filename ) {
     return getFile( filename );
 }
 
+/**
+ * A
+ * @param  {[type]} propertyName [description]
+ * @return {[type]}              [description]
+ */
 function getFile( propertyName ) {
 
   // 1. Get the filename for the spreadsheet based on the script property
@@ -204,8 +269,8 @@ function getFile( propertyName ) {
 
   // stop here if the string is null or empty space
   if ( isNullOrEmptySpace( name ) === true ) {
-     Logger.log( 'getFile(); Could not retrieve the filename for the "' +
-                propertyName + '" spreadsheet from the PropertiesService.' );
+     log( 'could not retrieve the filename for the "' + propertyName +
+     '" spreadsheet from the PropertiesService.', true, arguments );
      return null;
   }
 
@@ -214,7 +279,10 @@ function getFile( propertyName ) {
   var appFolder = getDataFolder();
 
   if ( appFolder === null ) {
-     Logger.log( 'getFile(); the app folder does not exist and could not be created.' );
+     log( 'the app folder does not exist and could not be created.',
+        true,
+        arguments
+     );
      return null;
   }
 
@@ -223,11 +291,11 @@ function getFile( propertyName ) {
   var files = appFolder.getFilesByName( name );
 
   if ( files.hasNext() === false ) {
-     Logger.log( 'getFile(); the \'' + name + '\' file does not exist. will attempt creation.' );
+     log( 'getFile(); the \'' + name + '\' file does not exist. will attempt creation.' );
      var spreadsheet = createFile( appFolder, name );
      var headers = getHeaders( name );
 
-     Logger.log( 'getFile(); the \'' + name + '\' file has been created. initializing...' );
+     log( 'getFile(); the \'' + name + '\' file has been created. initializing...' );
      return initializeFile( spreadsheet, headers );
   }
 
@@ -366,6 +434,12 @@ function setIdFmt( sheet, header, columnLetter ) {
   return true;
 }
 
+/**
+ * [setCurrencyFmt description]
+ * @param {[type]} sheet        [description]
+ * @param {[type]} header       [description]
+ * @param {[type]} columnLetter [description]
+ */
 function setCurrencyFmt( sheet, header, columnLetter ) {
 
   // makes sure the header ends with _AT (used for all date columns)
@@ -394,11 +468,11 @@ function setCurrencyFmt( sheet, header, columnLetter ) {
 }
 
 /**
-* . Formats the column to only accept email addresses if applicable.
-* . @param . sheet
-* . @param . header
-* . @param   columnLetter
-* . @return .boolean
+* Formats the column to only accept email addresses if applicable.
+* @param . sheet
+* @param . header
+* @param   columnLetter
+* @return .boolean
 */
 function setEmailFmt( sheet, header, columnLetter ) {
 
@@ -670,7 +744,7 @@ function isEmptyObject( obj ) {
 
     // empty objects have no properties
     if ( obj === null || obj === undefined ) {
-        log( 'isEmptyObject(): object is null or undefined.' );
+        log( getFnName( this ) + '(): object is null or undefined.' );
         return true;
     }
 
@@ -858,11 +932,11 @@ function cleanPhoneNumber( value ) {
 }
 
 /**
-* . Soft deletes the data with ID = rowID from the
-* . specified filename.
-* . @param  string filename
-* . @param  int    rowId
-* . @return boolean
+* Soft deletes the data with ID = rowID from the
+* specified filename.
+* @param  string filename
+* @param  int    rowId
+* @return boolean
 */
 function deleteData( filename, rowId ) {
   var data = {};
@@ -1052,16 +1126,40 @@ function titleCase( str ) {
 }
 
 /**
- * Logs the text hopefully to the browser console and Google Apps Script logging.
- * @param  {[type]} text  [description]
- * @param  {[type]} error [description]
- * @return {[type]}       [description]
+ * Logs the text hopefully to the browser console and
+ * Google Apps Script logging. Adds support for adding
+ * the function name to the beginning of each log
+ * entry for easier troubleshooting.
+ * @param  {string|object} text  [description]
+ * @param  {boolean}       error [description]
+ * @param  {arguments}     fn    The function as a variable or a function's
+ * "arguments" variable.
+ * @return {boolean}
  */
-function log( text, error ) {
-    if ( Logger && Logger.log ) {
+function log( text, error, fn ) {
+
+    // 2015.03.04 - if the parameter is not a string, then break down what it is
+    if ( isValidStringObject( text ) === false ) {
+        text = JSON.stringify( text );
+    }
+
+    // Stop here if there is nothing to log
+    if ( isNullOrEmptySpace( text ) === true ) {
+        return error === true;
+    }
+
+    // 2018.08.06 - add the function name to each log
+    // so we can more easily track where errors
+    // originated from
+    text = getFnName( fn ) + '(): ' + text;
+
+    if ( typeof Logger !== 'undefined' ) {
+        if ( error === true && Logger.error ) {
+            Logger.error( text );
+        }
         Logger.log( text );
     }
-    if ( console ) {
+    if ( typeof console !== 'undefined' ) {
         if ( error === true && console.error ) {
             console.error( text );
         }
@@ -1075,10 +1173,12 @@ function log( text, error ) {
 }
 
 /**
-* . Given an array of headers in a given file, give the
-* . numeric column index (1-based).
-* @returns int
-*/
+ * Given an array of headers in a given file, give the
+ * numeric column index (1-based).
+ * @param  {array} headers
+ * @param  {string} name
+ * @return {int}
+ */
 function getColumnIndex( headers, name ) {
    if ( headers === null || headers.length === 0 ||
        isNullOrEmptySpace( name ) === true ) {
@@ -1135,25 +1235,18 @@ function getHeaders( name ) {
  * @return {[type]}        [description]
  */
 if ( typeof( module ) !== 'undefined' && module.exports ) {
-    console.log( 'module.isNullOrEmpty: ' +
-    ( typeof module.isNullOrEmpty !== 'undefined' ? 'true' : 'false' ) );
-    console.log( 'global.isNullOrEmpty: ' +
-    ( typeof global.isNullOrEmpty !== 'undefined' ? 'true' : 'false' ) );
-    console.log( 'this.isNullOrEmpty: ' +
-    ( typeof this.isNullOrEmpty !== 'undefined' ? 'true' : 'false' ) );
-    console.log( 'isNullOrEmpty: ' +
-    ( typeof isNullOrEmpty !== 'undefined' ? 'true' : 'false' ) );
 
     // module.exports exposes any functions so they can be used
     // when this file is required as a module
     module.exports = {
         'deleteData': deleteData,
         'fillPicker': fillPicker,
-        'getAllData': getAllData,
         'getActualDataRange': getActualDataRange,
+        'getAllData': getAllData,
         'getCellValues': getCellValues,
         'getColumnIndex': getColumnIndex,
         'getFileByFilename': getFileByFilename,
+        'getFnName': getFnName,
         'getHeaders': getHeaders,
         'getNextId': getNextId,
         'getObject': getObject,
@@ -1170,6 +1263,5 @@ if ( typeof( module ) !== 'undefined' && module.exports ) {
         'setCurrencyFmt': setCurrencyFmt,
         'setEmailFmt': setEmailFmt,
         'titleCase': titleCase
-
     };
 }
