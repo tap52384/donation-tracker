@@ -69,7 +69,8 @@ function onOpen( e ) {
     // shows a second way that a custom menu can be added
     var spreadsheet = SpreadsheetApp.getActive();
     var menuItems = [
-      { name: 'Add donations...', functionName: 'manageDonations' },
+      { name: 'Add donations...', functionName: 'addDonations' },
+      { name: 'Edit donations...', functionName: 'manageDonations' },
       { name: 'Manage donation types...', functionName: 'manageDonationTypes' },
       { name: 'Manage donors...', functionName: 'manageDonors' },
       { name: 'Manage payment methods...', functionName: 'managePaymentMethods' }
@@ -103,7 +104,10 @@ function manageDonors() {
       .showModalDialog( html, 'Manage donors' );
 }
 
-function manageDonations() {
+/**
+ * What happens when you click the menu item for adding donations.
+ */
+function addDonations() {
 
   // HtmlOutput
   var html = extendTemplate( 'base', 'donations', 'customcss', 'donations.client.js' );
@@ -112,6 +116,21 @@ function manageDonations() {
    SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
    // showModalDialog(HtmlOutput, String)
       .showModalDialog( html, 'Add donations' );
+}
+
+/**
+ * What happens when you click the menu item for editing donations.
+ * @return {[type]} [description]
+ */
+function manageDonations() {
+
+  // HtmlOutput
+  var html = extendTemplate( 'base', 'edit', 'customcss', 'edit.client.js' );
+
+  // Ui
+   SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
+   // showModalDialog(HtmlOutput, String)
+      .showModalDialog( html, 'Edit donations' );
 }
 
 function manageDonationTypes() {

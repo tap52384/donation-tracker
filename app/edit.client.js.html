@@ -1,0 +1,153 @@
+/* eslint-env browser, node */
+/* global moment */
+
+;( function( code, $, window, document, google, moment, undefined ) {
+
+// This allows for javascript that should work pretty consistently across browsers and platforms.
+'use strict';
+
+// log that the file has been reached
+code.log( 'edit.client.js loaded.' );
+
+code.donors = document.getElementById( 'donor_id' );
+code.endAt = document.getElementById( 'end_at' );
+code.startAt = document.getElementById( 'start_at' );
+code.loadBtn = document.getElementById( 'edit-donations-load-btn' );
+
+code.clearAllFields = function() {
+
+};
+
+/**
+ * Adds the options to the "donors" select element.
+ * @param  {[type]} output [description]
+ * @return {[type]}        [description]
+ */
+code.addDonorsHtml = function( output ) {
+
+    // add an option for manually entering the name of a new donor on the fly
+    // output = '<option value="-1">Add new donor</option>' + output;
+    var donorId = document.getElementById( 'donor_id' );
+
+    // set the HTML of the select element
+    donorId.innerHTML = output;
+
+    // reset the donors select menu
+    donorId.value = '';
+
+    // stop the spinner
+    code.hideSpinner();
+};
+
+code.getPaymentMethodsHtml = function( output ) {
+
+    // save the HTML for the payment methods as a variable to be reused
+    code.paymentMethodsHtml = output;
+
+    // stop the spinner
+    code.hideSpinner();
+};
+
+code.getDonationTypesHtml = function( output ) {
+
+    // save the HTML for the payment methods as a variable to be reused
+    code.donationTypesHtml = output;
+
+    // stop the spinner
+    code.hideSpinner();
+};
+
+/**
+ * Clears the table so that new donations can be loaded.
+ * @return {[type]} [description]
+ */
+code.clearTable = function() {
+
+    // 1. Get the table rows
+    var table = document.getElementById( 'edit-donations-table' );
+    var oldBody = table.getElementsByTagName( 'tbody' )[ 0 ];
+    var newBody = document.createElement( 'tbody' );
+
+    // 2. Replace the old <tbody> with this newly created one
+    oldBody.parentNode.replaceChild( newBody, oldBody );
+};
+
+/**
+ * [description]
+ * @param  {[type]} output [description]
+ * @return {[type]}        [description]
+ */
+code.fillTable = function( output ) {
+    code.log( output, false, arguments );
+};
+
+if ( code.isNullOrEmpty( code.loadBtn ) === false ) {
+    code.loadBtn.onclick = function() {
+
+        // 1. Clear the table
+        code.clearTable();
+
+        // 2. Get the ID of the current user. If none, then stop here.
+        var userId = code.donors.value;
+        if ( code.isNullOrEmptySpace( userId ) === true || userId === '-1' ||
+        userId === -1 ) {
+
+            // stop the spinner and return
+            code.hideSpinner();
+            return;
+        }
+
+        // 3. Attempt to load the data for this user.
+        // asynchronously get the user donations
+        google.script.run.withSuccessHandler( code.fillTable )
+        .withFailureHandler( code.fillTable )
+        .getDonationFilterCriteria(
+            userId,
+            code.getValue( 'start_at' ),
+            code.getValue( 'end_at' )
+        );
+    };
+}
+
+code.setDefaultDateRange = function() {
+
+    // 1. Get the date for today and 1 month ago
+    var now = new Date();
+    var monthAgo = now;
+    monthAgo.setMonth( now.getMonth() - 1 );
+
+    // 2. Set the values of the textboxes to the dates
+    code.startAt.value = monthAgo.toISODateString();
+    code.endAt.value = now.toISODateString();
+};
+
+
+/**
+* Code run to load the donors
+*/
+if ( google && google.script && google.script.run ) {
+    google.script.run.withSuccessHandler( code.addDonorsHtml )
+    .fillUsersPicker();
+
+    google.script.run.withSuccessHandler( code.getPaymentMethodsHtml )
+    .fillPaymentMethodsPicker();
+
+    google.script.run.withSuccessHandler( code.addDonationTypesHtml )
+    .fillDonationTypesPicker();
+}
+
+// load the default dates
+code.setDefaultDateRange();
+
+
+// confirms whether the user is sure if they want to complete the given action
+} )( window.code = window.code || {},
+  window.jQuery,
+  window,
+  window.document,
+  window.google = window.google || {},
+  window.moment = window.moment || {}
+);
+
+// Down here is the code the defines the parameters used at the top of this
+// self-executing function. undefined is not defined so it is undefined. LOL

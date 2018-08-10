@@ -198,8 +198,8 @@ function isDateColumn( header ) {
 /**
  * Returns the data range for the specified file, skipping the first row which
  * contains the row headers.
- * @param  {[type]} filename [description]
- * @return {[type]}          [description]
+ * @param  {string} filename [description]
+ * @return {Range}          [description]
  */
 function getActualDataRange( filename ) {
    var spreadsheet = getFileByFilename( filename );
@@ -1229,6 +1229,17 @@ function getHeaders( name ) {
 
   return [];
 }
+
+/**
+ * Returns true if the object is a Date and has a valid date.
+ * @param  {Date} d [description]
+ * @return {boolean}   [description]
+ */
+function isValidDateObject( d ) {
+    return isNullOrEmptySpace( d ) === false &&
+    Object.prototype.toString.call( d ) === '[object Date]' &&
+    !isNaN( d.getTime() );
+};
 
 /**
  * This creates an object named "code" that will add all functions as properties

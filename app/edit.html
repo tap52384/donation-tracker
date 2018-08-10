@@ -1,0 +1,71 @@
+<form id="edit-donations-form">
+<h3>Edit / delete donations
+<div class="inline form-group display-none fa-2x" id="loading-spinner">
+  <!-- font-awesome spinner goes here -->
+  <!-- https://fontawesome.com/how-to-use/svg-with-js#additional-styling -->
+       <i class="fas fa-cog fa-spin"></i>
+  </div>
+</h3>
+
+  <div class="form-group">
+    <label for="donor_id">Donor</label>
+    <select class="form-control google-full-width" id="donor_id"
+    name="donor_id" autocomplete="off" required>
+      <option value="">Loading...</option>
+    </select>
+  </div> <!-- /.form-group -->
+
+  <br />
+
+  <div class="inline form-group">
+    <label>Date Range</label>
+    <input type="date" id="start_at" name="start_at" step="1"
+    min="1970-01-01" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"
+    placeholder="yyyy-mm-dd"
+    autocomplete="off" required />
+  </div>
+  <div class="inline form-group">
+    <span>to</span>
+  </div>
+  <div class="inline form-group">
+    <input type="date" id="end_at" name="end_at" step="1"
+    min="1970-01-01" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"
+    placeholder="yyyy-mm-dd"
+    autocomplete="off" required />
+  </div>
+  <div class="inline form-group">
+    <button type="button" id="edit-donations-load-btn"
+    name="edit-donations-load-btn" class="btn btn-success action"
+    autocomplete="off">Load</button>
+  </div>
+
+  <br />
+  <br />
+
+  <!-- in the background, also load the items for payment method and donation type -->
+  <!-- do not reload them with each successful edit -->
+  <!-- use the .display-none class to hide this table initially -->
+  <div class="form-group">
+    <label for="edit-donations-table">Donations</label>
+    <table class="table" id="edit-donations-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Amount</th>
+          <th>Method</th>
+          <th>Type</th>
+          <th></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+
+  <br />
+
+<!--  <button type="button" id="delete" name="delete" class="btn btn-primary btn-block create" autocomplete="off">Delete</button> -->
+  <button type="button" id="close" name="close" class="btn btn-primary form-control google-full-width" autocomplete="off">Close</button>
+
+</form>

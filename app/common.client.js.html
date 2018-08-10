@@ -182,6 +182,17 @@ code.isValidStringObject = function( s ) {
     Object.prototype.toString.call( s ) === '[object String]';
 };
 
+/**
+ * Returns true if the object is a Date and has a valid date.
+ * @param  {Date} d [description]
+ * @return {boolean}   [description]
+ */
+code.isValidDateObject = function( d ) {
+    return code.isNullOrEmptySpace( d ) === false &&
+    Object.prototype.toString.call( d ) === '[object Date]' &&
+    !isNaN( d.getTime() );
+};
+
 
 /**
 * . Logs what happened when the app fails to retrieve a record.
