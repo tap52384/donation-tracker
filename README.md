@@ -40,6 +40,7 @@ your Jest tests, you'll need to specify the `testURL` property in your
 
 
 ## TODO
+-   For the "edit" page, show all payment methods and donation types, even deleted ones; just show `(deleted)` beside the text
 -   Find a way to protect the top row so that it cannot be edited by normal users
 -   Make `donation-tracker` the main app folder so that it can be easily shared with others
 -   Fix client-side code so that it doesn't run on the server; check for browser-specific globals

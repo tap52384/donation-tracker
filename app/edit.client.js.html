@@ -77,9 +77,50 @@ code.clearTable = function() {
  * @param  {[type]} output [description]
  * @return {[type]}        [description]
  */
-code.fillTable = function( output ) {
-    var printout = JSON.stringify( output );
+code.fillTable = function( data ) {
+    var printout = JSON.stringify( data );
     code.log( 'fillTable(); ' + printout, false );
+
+    // 1. Get the table rows
+    var table = document.getElementById( 'edit-donations-table' );
+    var oldBody = table.getElementsByTagName( 'tbody' )[ 0 ];
+    var newBody = document.createElement( 'tbody' );
+
+    var output = '';
+    var count = code.isEmptyObject( data ) === false ? data.length : 0;
+
+    // 1. Loop through the rows and create the table rows
+    for ( var i = 0; i < count; i++ ) {
+        var rowId = data[ i ][ 0 ];
+        var givenAt = data[ i ][ 3 ];
+        var donationType = createTypeMenu( data[ i ][ 2 ] );
+        var paymentMethod = createMethodMenu( data[ i ][ 5 ] );
+        output += '<tr>';
+
+        // copy the date input from donations.html so that it works the same
+        output += '<td><input type="date" data-row-id="' + rowId + '" ' +
+        'value="' + givenAt + '" class="given_at" /></td>';
+        output += '<td><input type="number" class="form-control google-full-width number" ' +
+        'autocomplete="off" placeholder="0000.00" step="0.01" min="0.00" /></td>';
+        output += paymentMethod;
+        output += donationType;
+        output += '</tr>';
+    }
+
+    newBody.innerHTML = output;
+
+    // 2. Replace the old <tbody> with this newly created one
+    oldBody.parentNode.replaceChild( newBody, oldBody );
+
+
+};
+
+code.createMethodMenu = function( selected ) {
+    return '<td></td>';
+};
+
+code.createTypeMenu = function( selected ) {
+    return '<td></td>';
 };
 
 if ( code.isNullOrEmpty( code.loadBtn ) === false ) {
@@ -115,7 +156,7 @@ code.setDefaultDateRange = function() {
 
     // 1. Get the date for today and 1 month ago
     var now = new Date();
-    var monthAgo = now;
+    var monthAgo = new Date();
     monthAgo.setMonth( now.getMonth() - 1 );
 
     // 2. Set the values of the textboxes to the dates
