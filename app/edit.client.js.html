@@ -73,12 +73,13 @@ code.clearTable = function() {
 };
 
 /**
- * [description]
+ * Will fill the table with rows containing donation data.
  * @param  {[type]} output [description]
  * @return {[type]}        [description]
  */
 code.fillTable = function( output ) {
-    code.log( output, false, arguments );
+    var printout = JSON.stringify( output );
+    code.log( 'fillTable(); ' + printout, false );
 };
 
 if ( code.isNullOrEmpty( code.loadBtn ) === false ) {
@@ -93,6 +94,7 @@ if ( code.isNullOrEmpty( code.loadBtn ) === false ) {
         userId === -1 ) {
 
             // stop the spinner and return
+            code.log( 'no user specified, stopping', false );
             code.hideSpinner();
             return;
         }

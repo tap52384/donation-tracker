@@ -72,6 +72,15 @@ code.log = function( text, error ) {
         text = JSON.stringify( text );
     }
 
+    // 2018.08.06 - add the function name to each log
+    // so we can more easily track where errors
+    // originated from
+    // var name = code.getFnName( fn );
+    // if ( code.isNullOrEmptySpace( name ) === false ) {
+    //     text = name + '(): ' + text;
+    // }
+
+
     if ( typeof window !== 'undefined' && window.console ) {
 
         if ( error && window.console.error ) {

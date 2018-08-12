@@ -40,6 +40,8 @@ your Jest tests, you'll need to specify the `testURL` property in your
 
 
 ## TODO
+-   Find a way to protect the top row so that it cannot be edited by normal users
+-   Make `donation-tracker` the main app folder so that it can be easily shared with others
 -   Fix client-side code so that it doesn't run on the server; check for browser-specific globals
 like "window," "document," and "google.script"; all must be present for
 client-side code to run; maybe a simple if statement asking about all three?

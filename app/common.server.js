@@ -1,6 +1,6 @@
 /* eslint-env node */
 /* global SpreadsheetApp, ScriptApp, DriveApp, PropertiesService, Logger,
-HtmlService, Utilities */
+HtmlService, Utilities, Session */
 
 if ( typeof __dirname !== 'undefined' ) {
   console.log( '__dirname: ' + __dirname );
@@ -8,6 +8,23 @@ if ( typeof __dirname !== 'undefined' ) {
   require( __dirname + '/enums.js' );
 }
 
+/**
+ * Returns true if the specified variable is null, undefined, or an empty string.
+ * @param  {[type]}  x [description]
+ * @return {Boolean}   [description]
+ */
+function isNullOrEmpty( x ) {
+    return x === undefined || x === '' || x === null;
+}
+
+/**
+* Returns true if the specified variable is null, empty, or with all spaces
+* removed an empty string.
+*/
+function isNullOrEmptySpace( x ) {
+    return isNullOrEmpty( x ) || typeof x.trim === 'function' &&
+    isNullOrEmpty( x.trim().replace( / /g, '' ) );
+}
 
 /**
  * [isBrowser description]
@@ -201,23 +218,54 @@ function isDateColumn( header ) {
  * @param  {string} filename [description]
  * @return {Range}          [description]
  */
-function getActualDataRange( filename ) {
-   var spreadsheet = getFileByFilename( filename );
+function getDataRangeByFilename( filename ) {
 
-  if ( spreadsheet === null ) {
-     log( 'the spreadsheet ' + filename + ' was not found or loaded...',
+    // 1. Get the Spreadsheet object representing the specified file
+    var spreadsheet = getFileByFilename( filename );
+
+    if ( spreadsheet === null ) {
+      log( 'the spreadsheet ' + filename + ' was not found or loaded...',
         false,
         arguments
-     );
-     return null;
-  }
+      );
+      return null;
+    }
 
-  // get the range of cells with actual data there
-  // https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet#getDataRange()
-  // returns Range
-  // https://developers.google.com/apps-script/reference/spreadsheet/range
-  // offset should skip the first row (row with the column headers)
-  return spreadsheet.getDataRange().offset( 1, 0 );
+    // 2. Get the first sheet of the file
+    var sheet = getFirstSheet( spreadsheet );
+
+    // get the range of cells with actual data there
+    // https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet#getDataRange()
+    // returns Range
+    // https://developers.google.com/apps-script/reference/spreadsheet/range
+    // offset should skip the first row (row with the column headers)
+    // https://developers.google.com/apps-script/reference/spreadsheet/range#offsetrowoffset-columnoffset
+    return getDataRangeFromSheet( sheet );
+}
+
+/**
+ * When retrieving data from a Sheet, skips the first row (frozen header row).
+ * @param  {[type]} sheet [description]
+ * @return {Range}       [description]
+ */
+function getDataRangeFromSheet( sheet ) {
+    var range = getAllDataFromSheet( sheet );
+
+    return range === null ? null : range.offset( 1, 0 );
+}
+
+/**
+ * Retrieves all data as a Range from a Sheet object (includes the first row).
+ * @param  {[type]} sheet [description]
+ * @return {Range}       [description]
+ */
+function getAllDataFromSheet( sheet ) {
+    if ( isNullOrEmpty( sheet ) === true ||
+    typeof sheet.getDataRange !== 'function' ) {
+        log( 'Invalid Sheet or Spreadsheet object specified', true, arguments );
+        return null;
+    }
+    return sheet.getDataRange();
 }
 
 /**
@@ -228,7 +276,7 @@ function getActualDataRange( filename ) {
 function getAllData( filename ) {
 
   // get the data range for the specified spreadsheet
-  var data = getActualDataRange( filename );
+  var data = getDataRangeByFilename( filename );
 
   if ( data === null ) {
      return null;
@@ -249,9 +297,10 @@ function getAllData( filename ) {
   return data;
 }
 
+
 /**
 * . Returns a file by filename if it exists.
-* . @return Spreadsheet|null
+* . @return {Spreadsheet|null}
 */
 function getFileByFilename( filename ) {
 
@@ -261,9 +310,10 @@ function getFileByFilename( filename ) {
 }
 
 /**
- * A
- * @param  {[type]} propertyName [description]
- * @return {[type]}              [description]
+ * Returns a Spreadsheet object for the specified filename.
+ * @param  {string} propertyName [description]
+ * @return {Spreadsheet|null}
+ * @see https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet-app#openfile
  */
 function getFile( propertyName ) {
 
@@ -339,9 +389,7 @@ function createFile( folder, filename ) {
 function getSheetFromSpreadsheet( filename ) {
    var spreadsheet = getFileByFilename( filename );
 
-   return spreadsheet === null ?
-     null :
-     spreadsheet.getSheets()[ 0 ];
+   return getFirstSheet( spreadsheet );
 }
 
 /**
@@ -500,6 +548,17 @@ function setEmailFmt( sheet, header, columnLetter ) {
 }
 
 /**
+ * Returns the first Sheet of the specified Spreadsheet object.
+ * @param  {Spreadsheet} spreadsheet [description]
+ * @return {Sheet|null}             [description]
+ */
+function getFirstSheet( spreadsheet ) {
+    return typeof spreadsheet.getSheets === 'function' ?
+    spreadsheet.getSheets()[ 0 ] :
+    null;
+}
+
+/**
 * Adds the column headers to the spreadsheet needed for storing data. This
 * function also adds restrictions to columns based on data type (date, number,
 * etc).
@@ -513,7 +572,7 @@ function initializeFile( spreadsheet, headers ) {
   }
 
   // get the first sheet of the spreadsheet
-  var sheet = spreadsheet.getSheets()[ 0 ];
+  var sheet = getFirstSheet( spreadsheet );
 
   // add the headers to the first cell in each column in the first row (A)
   var numHeaders = headers.length;
@@ -776,23 +835,6 @@ function isEmptyObject( obj ) {
     return true;
 };
 
-/**
- * Returns true if the specified variable is null, undefined, or an empty string.
- * @param  {[type]}  x [description]
- * @return {Boolean}   [description]
- */
-function isNullOrEmpty( x ) {
-    return x === undefined || x === '' || x === null;
-}
-
-/**
-* Returns true if the specified variable is null, empty, or with all spaces
-* removed an empty string.
-*/
-function isNullOrEmptySpace( x ) {
-    return isNullOrEmpty( x ) || typeof x.trim === 'function' &&
-    isNullOrEmpty( x.trim().replace( / /g, '' ) );
-}
 
 /**
  * [printProperties description]
@@ -922,6 +964,11 @@ function saveData( filename, rowId, data ) {
      cell.setValue( data[ key ] );
   }
 
+  var action = isNewRow === true ? 'created' : 'updated';
+  var logText = 'row #' + rowId + ' was ' + action +
+  ' successfully for file "' + filename + '"';
+  log( logText, false, arguments );
+
   return true;
 }
 
@@ -965,7 +1012,7 @@ function rowIdIsValid( filename, rowId ) {
    // 1. Must be an integer
    // 2. Must be greater than 0
    // 3. rowId > 0 && rowId <= length + 1 (taking into account the offset used to skip the header row)
-   var data = getActualDataRange( filename );
+   var data = getDataRangeByFilename( filename );
 
    return data !== null && isNullOrEmptySpace( rowId ) === false &&
      Number.isInteger( rowId ) === true &&
@@ -979,7 +1026,7 @@ function rowIdIsValid( filename, rowId ) {
 * . @return int
 */
 function getNextId( filename ) {
-   var data = getActualDataRange( filename );
+   var data = getDataRangeByFilename( filename );
    return data !== null ? data.getNumRows() + 1 : -1;
 }
 
@@ -1084,8 +1131,8 @@ function getSortArray( filename, colObject ) {
         var order = getValidOrder( colObject[ header ] );
 
         if ( colIndex === -1 ) {
-            log( 'getSortArray(); index for header "' + header + '" could ' +
-            'not be found for file "' + filename + '"' );
+            log( 'index for header "' + header + '" could ' +
+            'not be found for file "' + filename + '"', false, arguments );
             continue;
         }
 
@@ -1141,20 +1188,23 @@ function titleCase( str ) {
  */
 function log( text, error, fn ) {
 
-    // 2015.03.04 - if the parameter is not a string, then break down what it is
-    if ( isValidStringObject( text ) === false ) {
-        text = JSON.stringify( text );
-    }
-
     // Stop here if there is nothing to log
     if ( isNullOrEmptySpace( text ) === true ) {
         return error === true;
     }
 
+    // 2015.03.04 - if the parameter is not a string, then break down what it is
+    if ( isValidStringObject( text ) === false ) {
+        text = JSON.stringify( text );
+    }
+
     // 2018.08.06 - add the function name to each log
     // so we can more easily track where errors
     // originated from
-    text = getFnName( fn ) + '(): ' + text;
+    var name = getFnName( fn );
+    if ( isNullOrEmptySpace( name ) === false ) {
+        text = name + '(): ' + text;
+    }
 
     if ( typeof Logger !== 'undefined' ) {
         if ( error === true && Logger.error ) {
@@ -1204,7 +1254,7 @@ function getColumnIndex( headers, name ) {
  * Every header ending in '_ID' is a number representing a row ID. Every header
  * ending in '_AT' is a date/time. All dates are handled the same.
  * @param  {[type]} name [description]
- * @return {[type]}      [description]
+ * @return {array}      [description]
  */
 function getHeaders( name ) {
   if ( isNullOrEmptySpace( name ) === true ) {
@@ -1255,7 +1305,7 @@ if ( typeof( module ) !== 'undefined' && module.exports ) {
     module.exports = {
         'deleteData': deleteData,
         'fillPicker': fillPicker,
-        'getActualDataRange': getActualDataRange,
+        'getDataRangeByFilename': getDataRangeByFilename,
         'getAllData': getAllData,
         'getCellValues': getCellValues,
         'getColumnIndex': getColumnIndex,
