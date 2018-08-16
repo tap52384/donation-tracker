@@ -255,9 +255,9 @@ function getDataRangeFromSheet( sheet ) {
 }
 
 /**
- * Retrieves all data as a Range from a Sheet object (includes the first row).
- * @param  {[type]} sheet [description]
- * @return {Range}       [description]
+ * Retrieves all data as a Range from a Sheet object (includes header row).
+ * @param  {[type]} sheet
+ * @return {Range}
  */
 function getAllDataFromSheet( sheet ) {
     if ( isNullOrEmpty( sheet ) === true ||
@@ -284,15 +284,18 @@ function getAllData( filename ) {
 
   // var rowCount = data.getNumRows();
   // var colCount = data.getNumColumns();
-  var headers = getHeaders( filename );
-  var idColIndex = getColumnIndex( headers, 'id' );
 
-  // sort the data by id
-  data = data.sort(
-    [
-      { column: idColIndex, ascending: true }
-    ]
-  );
+  // this code used to sort the data; no need as all data will be sorted
+  // depending on what it is
+  // var headers = getHeaders( filename );
+  // var idColIndex = getColumnIndex( headers, 'id' );
+  //
+  // // sort the data by id
+  // data = data.sort(
+  //   [
+  //     { column: idColIndex, ascending: true }
+  //   ]
+  // );
 
   return data;
 }
@@ -304,7 +307,7 @@ function getAllData( filename ) {
 */
 function getFileByFilename( filename ) {
 
-    filename = ( filename + '' ).toLowerCase();
+    filename = ( '' + filename ).toLowerCase();
 
     return getFile( filename );
 }
@@ -316,6 +319,13 @@ function getFileByFilename( filename ) {
  * @see https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet-app#openfile
  */
 function getFile( propertyName ) {
+
+  if ( isNullOrEmptySpace( propertyName ) === true ) {
+      log( 'propertyName: "' + propertyName + '" is invalid',
+      true,
+      arguments );
+      return null;
+  }
 
   // 1. Get the filename for the spreadsheet based on the script property
   var name = PropertiesService.getScriptProperties().getProperty( propertyName );
@@ -1031,6 +1041,146 @@ function getNextId( filename ) {
 }
 
 /**
+ * Returns a default sort array based on filename
+ * @param  {string} filename
+ * @return {array}
+ */
+function getSortArrayByFilename( filename ) {
+    var columns = {
+        'name': 'ascending'
+    };
+
+    filename = ( '' + filename ).toLowerCase();
+
+    // only include special cases
+    if ( filename === 'donations' ) {
+        columns = {
+            'given_at': 'descending'
+        };
+    }
+
+    if ( filename === 'donors' ) {
+        columns = {
+            'firstname': 'ascending',
+            'mi': 'ascending',
+            'lastname': 'ascending',
+            'suffix': 'ascending'
+        };
+    }
+
+    return getSortArray( filename, columns );
+}
+
+
+/**
+ * [getDataValues description]
+ * @param  {string} filename    [description]
+ * @param  {[type]} sortArray   [description]
+ * @param  {[type]} showTrashed [description]
+ * @return {array}             [description]
+ */
+function getDataValues( filename, showTrashed ) {
+
+    if ( isNullOrEmptySpace( filename ) === true ) {
+        log(
+            'filename "' + filename + '" is invalid',
+            true,
+            arguments
+        );
+    }
+
+    // 1. Get all data for the specified filename
+    var range = getDataRangeByFilename( filename );
+
+    if ( isNullOrEmpty( range ) === true ) {
+        log(
+            'could not load data from file "' + filename + '"',
+            true,
+            arguments
+        );
+        return [];
+    }
+
+    var sortArray = getSortArrayByFilename( filename );
+
+    // 2. Sort the range
+    if ( sortArray.length === 0 ) {
+        return range.getValues();
+    }
+
+    range = range.sort( sortArray );
+
+    var data = range.getDisplayValues();
+
+    // 3. Return the values without the deleted data.
+    // TODO: This is a manual process; if there is a way to do it via filter
+    // that may be faster. Simultaneously, menu data won't be that long so
+    // the effort may not be worth it.
+    var headers = getHeaders( filename );
+    var deletedAtColIndex = getColumnArrayIndex( headers, 'deleted_at' );
+    var idColIndex = getColumnArrayIndex( headers, 'id' );
+
+    var filtered = [];
+    var count = data.length;
+
+    for ( var i = 0; i < count; i++ ) {
+        var deletedAt = new Date( data[ i ][ deletedAtColIndex ] );
+        if ( showTrashed !== true &&
+        deletedAtColIndex >= 0 &&
+        isNullOrEmptySpace( data[ i ][ deletedAtColIndex ] ) === false ) {
+            continue;
+        }
+
+        if ( isNullOrEmptySpace( data[ i ][ idColIndex ] ) === true ) {
+            continue;
+        }
+
+        filtered.push( data[ i ] );
+    }
+
+    log( 'data: ' + JSON.stringify( filtered ), false, arguments );
+
+    return filtered;
+}
+
+/**
+ *
+ * @param  {[type]} filename    [description]
+ * @param  {[type]} selectId    [description]
+ * @param  {[type]} defaultText [description]
+ * @param  {[type]} showTrashed [description]
+ * @return {object}             [description]
+ */
+function getMenuData( filename, selectId, defaultText, showTrashed ) {
+
+    // Object to be returned
+    var output = new Object();
+    output.file = filename;
+
+    log( 'filename: "' + output.file + '"', false, arguments );
+
+    output.selectId = selectId;
+    output.defaultText = defaultText;
+
+    output.headers = getHeaders( filename );
+
+    log( 'headers for file "' + filename + '": ' +
+    JSON.stringify( output.headers ) );
+
+    output.showTrashed = showTrashed === true;
+    output.sortArray = getSortArrayByFilename( filename );
+
+    log( 'sortArray for "' + filename + '": ' +
+    JSON.stringify( output.sortArray ), false, arguments );
+
+    output.data = [];
+
+    output.data = getDataValues( filename, showTrashed );
+    return output;
+}
+
+
+/**
 * . Retrieves all data from the specified file, sorts it
 * . using the specified columns and returns a string
 * . to fill a <select> element.
@@ -1128,7 +1278,6 @@ function getSortArray( filename, colObject ) {
         }
 
         var colIndex = getColumnIndex( headers, header );
-        var order = getValidOrder( colObject[ header ] );
 
         if ( colIndex === -1 ) {
             log( 'index for header "' + header + '" could ' +
@@ -1140,7 +1289,7 @@ function getSortArray( filename, colObject ) {
         // the specified file
         var sortObject = {};
         sortObject.column = colIndex;
-        sortObject[ order ] = true;
+        sortObject.ascending = getValidOrder( colObject[ header ] );
         sortArray.push( sortObject );
     }
 
@@ -1151,17 +1300,13 @@ function getSortArray( filename, colObject ) {
  * Returns a valid sort order for the sort array, which is used when retrieving
  * data from a Google Sheet.
  * @param  {string} direction Either 'ascending' or 'descending'.
- * @return {string}
+ * @return {boolean}
  */
 function getValidOrder( direction ) {
 
     direction = ( direction + '' ).toLowerCase().trim();
 
-    if ( direction === 'descending' || direction === 'desc' ) {
-        return 'descending';
-    }
-
-    return 'ascending';
+    return direction !== 'descending' && direction !== 'desc';
 }
 
 /**
@@ -1246,6 +1391,19 @@ function getColumnIndex( headers, name ) {
     }
   }
   return -1;
+}
+
+/**
+ * Given an array of headers in a given file, get the numerical column index
+ * (0-based). Useful when using range.getValues() for table data.
+ * @param  {array} headers [description]
+ * @param  {string} name    [description]
+ * @return {int}         [description]
+ */
+function getColumnArrayIndex( headers, name ) {
+    var colIndex = getColumnIndex( headers, name );
+
+    return colIndex > 0 ? colIndex - 1 : colIndex;
 }
 
 /**

@@ -25,6 +25,17 @@ code.isNullOrEmptySpace = function( x ) {
 };
 
 /**
+* Changes a string to title case.
+* @returns string
+* @link https://gist.github.com/SonyaMoisset/b2606b3a7048cc5303f64a726a39e5fd#file-title-case-a-sentence-with-map-wc-js
+*/
+code.titleCase = function( str ) {
+  return str.toLowerCase().split( ' ' ).map( function( word ) {
+    return ( word.charAt( 0 ).toUpperCase() + word.slice( 1 ) );
+  } ).join( ' ' );
+};
+
+/**
  * Retrieves the name of the function for logging purposes.
  * @param  {function|arguments} obj A function or its arguments.
  * @return {string}
@@ -344,6 +355,51 @@ code.fillDetails = function( object ) {
     code.hideSpinner();
   };
 
+  code.getMenu = function( filename, id, defaultText ) {
+
+      // 1. Get the headers
+      google.script.run.withSuccessHandler( code.fillMenu )
+      .getMenuData( filename, id, defaultText );
+  };
+
+  // 1. specify the filename to get headers and data
+  // 2. specify the ID of the select element to be populated
+  // 3. specify the default item text for the menu
+  // 4. get the default sort array for each file type (server-side)
+  // 5. Return an object where each piece is a property:
+  // data, filename, headers, id, text
+
+  code.fillMenu = function( output ) {
+
+      // 1. Make sure the select element exists
+      var select = document.getElementById( output.selectId );
+
+      if ( select === null ) {
+          code.log( 'fillMenu(); invalid id "' + output.selectId +
+          '" specified for menu' );
+          return false;
+      }
+
+      // 2. Set the default item at the top of the menu
+      if ( code.isNullOrEmptySpace( output.defaultText ) === true ) {
+          output.defaultText = 'Select an item';
+      }
+      var html = '<option value="">' + output.defaultText + '</option>';
+      var count = code.isNullOrEmpty( output.data ) === false &&
+      output.data.length ?
+      output.data.length : 0;
+
+      for ( var i = 0; i < count; i++ ) {
+          html += '<option value="' + output.data[ i ][ 0 ] + '">';
+          html += code.titleCase( 'to be filled...' );
+          html += '</option>';
+      }
+
+      // 3. Set the HTML of the menu
+      select.innerHTML = html;
+      return true;
+  };
+
   /**
   * . Universal function for preparing data to be saved
   */
@@ -395,6 +451,51 @@ code.fillDetails = function( object ) {
 
     return object;
   };
+
+  /**
+   * [description]
+   * @param  {array} headers
+   * @param  {string} name
+   * @return {int}
+   */
+  code.getHeaderIndex = function( headers, name ) {
+
+      if ( headers === null || code.isNullOrEmptySpace( name ) === true ) {
+          return -1;
+      }
+      var count = headers.length;
+
+      for ( var i = 0; i < count; i++ ) {
+          if ( headers[ i ].toLowerCase() === name.toLowerCase() ) {
+              return i;
+          }
+      }
+
+      return -1;
+  };
+
+  /**
+   * Given an array of headers in a given file, give the
+   * numeric column index (1-based).
+   * @param  {array} headers
+   * @param  {string} name
+   * @return {int}
+   */
+  function getColumnIndex( headers, name ) {
+     if ( headers === null || headers.length === 0 ||
+         isNullOrEmptySpace( name ) === true ) {
+        return -1;
+     }
+
+     var count = headers.length;
+
+    for ( var i = 0; i < count; i++ ) {
+      if ( headers[ i ].toLowerCase() === name.toLowerCase() ) {
+        return i + 1;
+      }
+    }
+    return -1;
+  }
 
   /**
   * . Returns true if the given string represents a valid date.
