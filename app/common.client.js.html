@@ -743,6 +743,8 @@ code.fillDetails = function( object ) {
       // 0. Fix the amount given
       amount = ( '' + amount ).replace( /\$/gi, '' ).trim();
 
+      var error = '';
+
       // 1. The ID of the donation either must be empty or a positive number
       if ( code.isNullOrEmptySpace( donationId ) === false &&
       ( code.isNumeric( donationId ) === false ||

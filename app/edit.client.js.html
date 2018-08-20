@@ -147,7 +147,7 @@ code.fillTable = function( output ) {
             output.data[ i ][ paymentMethodId ],
             rowId
         );
-        html += '<tr>' + '\r\n';
+        html += '<tr data-row-id="' + rowId + '">' + '\r\n';
 
         // copy the date input from donations.html so that it works the same
         html += '<td>';
@@ -265,6 +265,9 @@ if ( code.isNullOrEmpty( code.donationsTable ) === false ) {
         ' This action cannot be undone' ) === true ) {
             code.log( 'Attempting to delete donation "' +
             element.getAttribute( 'data-row-id' ) + '"...' );
+
+            // delete the donation
+            code.deleteDonation( element );
         }
 
         // handle clicking the save button
@@ -273,11 +276,70 @@ if ( code.isNullOrEmpty( code.donationsTable ) === false ) {
         element.hasAttribute( 'data-row-id' ) === true ) {
             code.log( 'Attempting to save changes to donation "' +
             element.getAttribute( 'data-row-id' ) + '"...' );
+
+            // save the changes to the donation
+            code.saveDonation( element );
         }
 
     } );
 }
 
+/**
+ * Deletes a donation.
+ * @param  {[type]} element [description]
+ * @return {[type]}         [description]
+ */
+code.deleteDonation = function( element ) {
+
+    // 1. Get the ID of the current donation
+    var donationId = element.getAttribute( 'data-row-id' );
+
+    // 2. Delete the donation
+    google.script.run.withSuccessHandler( code.hideDeletedDonation )
+    .withFailureHandler( code.donationSaveFailed )
+    .withUserObject( donationId )
+    .deleteData( 'donations', donationId );
+
+    // 3. Show the loading spinner
+    code.showSpinner();
+};
+
+/**
+ * Deletes the row from the UI and hides the spinner upon successfully
+ * deleting a donation.
+ * @param  {boolean} result     [description]
+ * @param  {string}  donationId [description]
+ * @return {boolean}
+ */
+code.hideDeletedDonation = function( result, donationId ) {
+
+    code.log( 'donationId: "' + donationId + '"' );
+
+    if ( result !== true ) {
+        code.log( 'The donation was NOT deleted successfully.', true );
+        code.hideSpinner();
+        return false;
+    }
+
+    // 1. Find the row in the table that has the specified donation ID
+    var row = document.querySelector(
+      '#edit-donations-table tr[data-row-id="' + donationId + '"]'
+    );
+
+    if ( row !== null ) {
+        row.remove();
+    }
+
+    // 2. Hide the loading spinner
+    code.hideSpinner();
+    return true;
+};
+
+/**
+ * Saves any changes to the current donation
+ * @param  {HTMLDomElement} element [description]
+ * @return {boolean}         [description]
+ */
 code.saveDonation = function( element ) {
 
     // 1. Based on the donation id, get all of the required fields for
@@ -318,12 +380,26 @@ code.saveDonation = function( element ) {
     data.given_at = givenAt;
     data.amount = amount;
 
-    google.script.run.withSuccessHandler( code.saveResult )
-    .withFailureHandler( code.hideSpinner )
+    // Saves the new donation data
+    google.script.run.withSuccessHandler( code.hideSpinner )
+    .withFailureHandler( code.donationSaveFailed )
     .saveData( 'donations', donationId, data );
 
     // 4. Show the loading spinner
     code.showSpinner();
+};
+
+/**
+ * Handles what happens when a delete or save fails.
+ * @param  {Error} obj [description]
+ * @return {[type]}     [description]
+ * @see https://developers.google.com/apps-script/guides/html/reference/run#withFailureHandler(Function)
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
+ */
+code.donationSaveFailed = function( obj ) {
+    code.log( obj.name + ': ' + obj.message, true );
+    code.hideSpinner();
+    alert( 'Your donation was not saved successfully. Please try again.' );
 };
 
 /**

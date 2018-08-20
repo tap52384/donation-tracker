@@ -480,9 +480,15 @@ function setIdFmt( sheet, header, columnLetter ) {
   // Multiple COUNTIF for combining criteria
   // https://www.ablebits.com/office-addins-blog/2017/06/29/countif-google-sheets/
   // =AND(ISNUMBER(A1), COUNTIF($A:$A,"="&A1) + COUNTIF($A:$A,"<=0") < 2)
-  var formula = '=COUNTIF($' + columnLetter + ':$' + columnLetter + ',"="&' +
-  columnLetter + '1) + ' +
-    'COUNTIF($' + columnLetter + ':$' + columnLetter + ',"<=0") < 2';
+
+
+  // var formula = '=COUNTIF($' + columnLetter + ':$' + columnLetter + ',"="&' +
+  // columnLetter + '1) + ' +
+  //   'COUNTIF($' + columnLetter + ':$' + columnLetter + ',"<=0") < 2';
+
+    var formula = '=eq(countunique($' + columnLetter + '2:$' + columnLetter +
+    '), countif($' + columnLetter + ':$' + columnLetter + ', ">0"))'; ;
+
   var args = [ formula ];
 
   var combinedRule = SpreadsheetApp.newDataValidation()
