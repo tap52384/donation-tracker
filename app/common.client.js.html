@@ -199,6 +199,15 @@ code.hideSpinner = function() {
 };
 
 /**
+ * This is an unused placeholder function called by the common javascript file
+ * to reset all of the fields on a form.
+ * @return {[type]} [description]
+ */
+code.clearAllFields = function() {
+
+};
+
+/**
 * . Returns true if the email address is possibly valid.
 * . @param  string email
 * . @return boolean
@@ -214,8 +223,17 @@ code.isValidEmail = function( email ) {
  * @return {Boolean}   [description]
  */
 code.isValidStringObject = function( s ) {
-    return !code.isNullOrEmpty( s ) &&
-    Object.prototype.toString.call( s ) === '[object String]';
+    return Object.prototype.toString.call( s ) === '[object String]';
+};
+
+/**
+ * Returns true if the object is a number
+ * @param  {object} input [description]
+ * @return {boolean}       [description]
+ */
+code.isNumber = function( input ) {
+    return typeof input === 'number' ||
+    Object.prototype.toString.call( input ) === '[object Number]';
 };
 
 /**
@@ -504,8 +522,9 @@ code.fillDetails = function( object ) {
 
       // retrieves the value for the given input, trimming whitespace from
       // the ends
+      // 2018.08.19 - removes any dollar signs from any specified fields
       var id = header.toLowerCase();
-      object[ header ] = code.getValue( id ).trim();
+      object[ header ] = code.getValue( id ).trim().replace( /\$/gi, '' );
 
       code.log( 'collect(); header: ' + header );
       code.log( 'collect(); value: ' + object[ header ] );
@@ -682,6 +701,98 @@ code.fillDetails = function( object ) {
 
     // return an array containing any matches
     return matches;
+  };
+
+  /**
+   * Returns true if the object is numeric. Must be a string or number object.
+   * @param  {string|int} obj
+   * @return {boolean}
+   */
+  code.isNumeric = function( obj ) {
+
+      // 1. Must be a number of a string
+      return ( code.isNumber( obj ) === true ||
+      code.isValidStringObject( obj ) === true ) &&
+
+      // parseFloat NaNs numeric-cast false positives ("")
+			// ...but misinterprets leading-number strings, particularly hex literals ("0x...")
+			// subtraction forces infinities to NaN
+			!isNaN( obj - parseFloat( obj ) );
+  };
+
+  /**
+   * Returns an error any info for this donation is invalid, an empty string if
+   * all input passes validation.
+   * @param  {[type]} donationId      [description]
+   * @param  {[type]} donorId         [description]
+   * @param  {[type]} amount          [description]
+   * @param  {[type]} paymentMethodId [description]
+   * @param  {[type]} donationTypeId  [description]
+   * @param  {string} givenAt         [description]
+   * @return {string}                 [description]
+   */
+  code.validateDonationInput = function(
+      donationId,
+      donorId,
+      amount,
+      paymentMethodId,
+      donationTypeId,
+      givenAt
+  ) {
+
+      // 0. Fix the amount given
+      amount = ( '' + amount ).replace( /\$/gi, '' ).trim();
+
+      // 1. The ID of the donation either must be empty or a positive number
+      if ( code.isNullOrEmptySpace( donationId ) === false &&
+      ( code.isNumeric( donationId ) === false ||
+      parseInt( donationId, 10 ) < 0 ) ) {
+          error = 'Invalid donation ID. Please report this error to be fixed.';
+      }
+
+      // 2. Every donation must have a valid donor ID
+      else if ( code.isNumeric( donorId ) === false ||
+      parseInt( donorId, 10 ) < 0 ) {
+          error = 'Please select a donor.';
+      }
+
+      // 3. The amount must be a positive number greater than 0
+      else if ( code.isNullOrEmptySpace( amount ) === true ||
+      isNaN( amount ) === true || +amount !== +amount ||
+      parseFloat( amount ) <= 0 ) {
+         error = 'Please enter a donation amount greater than 0.';
+      }
+
+      // 4. Must have a valid payment method ID, even if they have been deleted
+      else if ( code.isNullOrEmptySpace( paymentMethodId ) === true ||
+      code.isNumeric( paymentMethodId ) === false ||
+      parseInt( paymentMethodId, 10 ) < 0 ) {
+          error = 'Please select a valid payment method.';
+      }
+
+      // 5. Must have a valid donation type, even if they have been deleted
+      else if ( code.isNullOrEmptySpace( donationTypeId ) === true ||
+      code.isNumeric( donationTypeId ) === false ||
+      parseInt( donationTypeId, 10 ) < 0 ) {
+          error = 'Please select a valid donation type.';
+      } else if ( code.isValidDate( givenAt ) === false ) {
+          error  = 'Please enter a valid donation date in the format YYYY-MM-DD.';
+      }
+
+      return error;
+  };
+
+  /**
+   * Returns true if the element has the specified class.
+   * @param  {HTMLDomElement} element   [description]
+   * @param  {string} className [description]
+   * @return {boolean}
+   * @see https://stackoverflow.com/a/5898748/1620794
+   */
+  code.hasClass = function( element, className ) {
+      return code.isNullOrEmpty( element ) === false &&
+      element.className &&
+      ( ' ' + element.className + ' ' ).indexOf( ' ' + className + ' ' ) > -1;
   };
 
   code.closeButton = document.getElementById( 'close' );

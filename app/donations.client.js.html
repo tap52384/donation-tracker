@@ -135,65 +135,40 @@ if ( code.isNullOrEmpty( code.addDonationTypeBtn ) === false ) {
   };
 }
 
-
+/**
+ * Validates the donation input and makes sure that it is valid before
+ * attempting to save it.
+ * @return {boolean} [description]
+ */
 code.validateInput = function() {
      var error = '';
 
      var amount = code.getValue( 'amount' );
      var donor = code.getValue( 'donor_id' );
-
-     // var firstname = getValue('firstname');
-     // var mi = getValue('mi');
-     // var lastname = getValue('lastname');
-     // var suffix = getValue('suffix');
-     // var fullName = firstname + ' ' + lastname +
-     // ' ' + suffix;
-
      var paymentMethod = code.getValue( 'paymentmethod_id' );
      var donationType = code.getValue( 'donationtype_id' );
      var givenDate = code.getValue( 'given_at' );
 
-     // for duplicate entry detection when adding a new donor
-     // var displayInputs = ['firstname', 'lastname', 'suffix'];
-     // var possibleDupeIds = exists(displayInputs, 'donor_id');
-
-     // If a new donor is specified (donor === -1), then first and last name are required
-     // if ( donor === -1 || donor === '-1' ) {
-     //      if ( firstname.trim().length < 2 || lastname.trim().length < 2 ) {
-     //        error = 'When adding a new donor, the first and last name are ' +
-     //        'required and must be at least 2 characters each.';
-     //      }
-     // } else
-     if ( code.isNullOrEmptySpace( paymentMethod ) === true ) {
-        error = 'Please select a payment method.';
-     } else if ( code.isNullOrEmptySpace( donationType ) === true ) {
-        error = 'Please select a donation type.';
-     } else if ( code.isNullOrEmptySpace( amount ) === true ||
-     isNaN( amount ) === true || +amount !== +amount ||
-     parseFloat( amount ) <= 0 ) {
-        error = 'Please enter a donation amount greater than 0.';
-     } else if ( code.isValidDate( givenDate ) === false ) {
-        error = 'Please enter a valid donation date in the format YYYY-MM-DD.';
-     } else if ( code.isNullOrEmptySpace( donor ) === true ) {
-        error = 'Please select a donor.';
-     }
+     var error = code.validDonationInput(
+        null,
+        donor,
+        amount,
+        paymentMethod,
+        donationType,
+        givenDate
+     );
 
      code.log( 'validateInput(); error: ' + error );
 
-     // log( 'validateInput(); okToAdd: ' + okToAdd);
-
-     // return true if all required values are given and either the
-     // data already exists, is brand new, or the user confirmed adding
-     // a duplicate
+     // if no error, validation was successful
      if ( code.isNullOrEmptySpace( error ) === true ) {
         return true;
      }
 
-     // show an error if one is generated (not needed for exists since a confirm() is used already)
-     if ( code.isNullOrEmptySpace( error ) === false ) {
-        alert( error );
-     }
-     return false;
+    // show an error if one is generated (not needed for exists since a confirm() is used already)
+    alert( error );
+
+    return false;
 };
 
 /**
@@ -211,14 +186,10 @@ code.validateInput = function() {
 
     code.log( 'submit(donations); data: ' + JSON.stringify( data ) );
 
-      // fix this function before you allow it to work
-      // TODO: need to be able to chain the ability to add a new donor
-      // along with adding the actual donation
-      // then, the donor_id needs to be set to the new donor id that is returned
-      // and then the donation needs to be saved correctly
-     google.script.run.withSuccessHandler( code.saveResult )
-     .withFailureHandler( code.hideSpinner )
-     .saveData( 'donations', null, data );
+    // Saves the new donation
+    google.script.run.withSuccessHandler( code.saveResult )
+    .withFailureHandler( code.hideSpinner )
+    .saveData( 'donations', null, data );
   };
 
   code.saveResult = function( result ) {
