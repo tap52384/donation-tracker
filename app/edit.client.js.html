@@ -104,8 +104,8 @@ code.clearTable = function() {
  * @param  {[type]} output [description]
  * @return {[type]}        [description]
  */
-code.fillTable = function( data ) {
-    var printout = JSON.stringify( data );
+code.fillTable = function( output ) {
+    var printout = JSON.stringify( output );
     code.log( 'fillTable(); ' + printout, false );
 
     // 1. Get the table rows
@@ -113,88 +113,139 @@ code.fillTable = function( data ) {
     var oldBody = table.getElementsByTagName( 'tbody' )[ 0 ];
     var newBody = document.createElement( 'tbody' );
 
-    var output = '';
-    var count = code.isEmptyObject( data ) === false ? data.length : 0;
+    var html = '';
+
+    // TODO: remove this line
+    window.testTableOutput = code.testTableOutput = output;
+
+    var count = output.data && code.isEmptyObject( output.data ) === false ?
+    output.data.length : 0;
+
+    var donationId = code.getHeaderIndex( output.headers, 'id' );
+    var givenAtId = code.getHeaderIndex( output.headers, 'given_at' );
+    var amountId = code.getHeaderIndex( output.headers, 'amount' );
+    var donationTypeId = code.getHeaderIndex( output.headers, 'donationtype_id' );
+    var paymentMethodId = code.getHeaderIndex( output.headers, 'paymentmethod_id' );
 
     // 1. Loop through the rows and create the table rows
     // TODO: Do not use "magic" numbers for the indexes below
     for ( var i = 0; i < count; i++ ) {
-        var rowId = data[ i ][ 0 ];
-        var givenAt = data[ i ][ 3 ];
-        var amount = data[ i ][ 4 ]; // check this obviously
-        var donationType = createTypeMenu( data[ i ][ 2 ] );
-        var paymentMethod = createMethodMenu( data[ i ][ 5 ] );
-        output += '<tr>';
+        var rowId = output.data[ i ][ donationId ];
+        var givenAt = output.data[ i ][ givenAtId ];
+
+        // dollar amounts are given with the dollar sign
+        // this removes the dollar sign so they can be processed properly
+        var amount = ( output.data[ i ][ amountId ] + '' ).replace( /\$/gi, '' );
+        var donationType = code.getDonationPartMenu(
+            output.paymentMethodHeaders,
+            'donationtype_id',
+            code.donationTypesHtml,
+            output.data[ i ][ donationTypeId ],
+            rowId
+        );
+        var paymentMethod = code.getDonationPartMenu(
+            output.paymentMethodHeaders,
+            'paymentmethod_id',
+            code.paymentMethodsHtml,
+            output.data[ i ][ paymentMethodId ],
+            rowId
+        );
+        html += '<tr>' + '\r\n';
 
         // copy the date input from donations.html so that it works the same
-        output += '<td>';
-        output += '<input type="date" id="given_at" name="given_at" step="1" ' +
+        html += '<td>';
+        html += '<input type="date" id="given_at" name="given_at" step="1" ' +
         'min="1970-01-01" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" ' +
-        'placeholder="yyyy-mm-dd" class="form-control google-full-width" ' +
+        'placeholder="yyyy-mm-dd" ' +
         'autocomplete="off" data-row-id="' + rowId + '" name="given_at" ' +
         'value="' + givenAt + '" class="given_at" />';
-        output += '</td>';
+        html += '</td>';
 
         // amount
-        output += '<td>';
-        output += '<input type="number" ' +
-        'class="form-control google-full-width" name="amount" ' +
+        html += '<td>';
+        html += '<input type="number" ' +
+        ' name="amount" ' +
         'autocomplete="off" placeholder="0000.00" step="0.01" min="0.00" ' +
-        'data-row-id="' + rowId + '" value="' + amount + '" class="amount"  />';
-        output += '</td>';
+        'data-row-id="' + rowId + '" value="' + amount + '" class="amount" />';
+        html += '</td>';
 
-        output += paymentMethod;
-        output += donationType;
-        output += '</tr>';
+        html += paymentMethod;
+        html += donationType;
+
+        // save button
+        html += code.getDonationSaveBtn( rowId );
+
+        // delete button
+        html += code.getDonationDeleteBtn( rowId );
+
+        // closes the row
+        html += '</tr>' + '\r\n';
     }
 
-    newBody.innerHTML = output;
+    newBody.innerHTML = html;
 
     // 2. Replace the old <tbody> with this newly created one
     oldBody.parentNode.replaceChild( newBody, oldBody );
+};
 
+code.getDonationSaveBtn = function( rowId ) {
 
+    var html = '<td>';
+    html += '<button type="button" class="btn action" ';
+    html += 'data-row-id="' + rowId + '">';
+    html += 'Save';
+    html += '</button>';
+    html += '</td>';
+    return html;
+};
+
+code.getDonationDeleteBtn = function( rowId ) {
+
+    var html = '<td>';
+    html += '<button type="button" class="btn create" ';
+    html += 'data-row-id="' + rowId + '">';
+    html += 'Delete';
+    html += '</button>';
+    html += '</td>';
+    return html;
 };
 
 /**
- * Creates the payment method menu for each donation.
+ * Creates the HTML for the payment methods and donation types for
+ * each transaction row.
+ * @param  {[type]} headers  [description]
+ * @param  {[type]} name     [description]
+ * @param  {[type]} options  [description]
  * @param  {[type]} selected [description]
  * @return {string}          [description]
  */
-code.createMethodMenu = function( selected ) {
-    var output = '<td>';
-    output += '<select class="form-control google-full-width" ' +
-    'name="paymentmethod_id" autocomplete="off">';
+code.getDonationPartMenu = function( headers, name, options, selected, rowId ) {
 
-    output += code.paymentMethodsHtml;
+  var itemId = code.getHeaderIndex( headers, 'id' );
+  var nameId = code.getHeaderIndex( headers, 'name' );
+  var count = Array.isArray( options ) === true ? options.length : 0;
 
-    // TODO: a for loop would be used here so that we can set the selected
-    // payment method in the menu
+  var output = '<td>';
+  output += '<select ' +
+  'name="' + name + '" autocomplete="off" ';
+  output += 'data-row-id="' + rowId + '">';
+  output += '>';
 
-    output += '</select>';
-    output += '</td>';
-    return output;
+  for ( var i = 0; i < count; i++ ) {
+      output += '<option value="' + options[ i ][ itemId ] + '" ';
+      if ( selected === options[ i ][ itemId ] ) {
+          output += 'selected="selected"';
+      }
+      output += '>';
+      output += options[ i ][ nameId ];
+      output += '</option>';
+  }
+
+  output += '</select>';
+  output += '</td>';
+  return output;
 };
 
-/**
- * [description]
- * @param  {[type]} selected [description]
- * @return {string}          [description]
- */
-code.createTypeMenu = function( selected ) {
-    var output = '<td>';
-    output += '<select class="form-control google-full-width" ' +
-    'name="donationtype_id" autocomplete="off">';
-
-    output += code.paymentMethodsHtml;
-
-    // TODO: a for loop would be used here so that we can set the selected
-    // payment method in the menu
-
-    output += '</select>';
-    output += '</td>';
-    return output;
-};
 
 if ( code.isNullOrEmpty( code.loadBtn ) === false ) {
     code.loadBtn.onclick = function() {
@@ -217,7 +268,7 @@ if ( code.isNullOrEmpty( code.loadBtn ) === false ) {
         // asynchronously get the user donations
         google.script.run.withSuccessHandler( code.fillTable )
         .withFailureHandler( code.fillTable )
-        .getDonationFilterCriteria(
+        .getUserDonations(
             userId,
             code.getValue( 'start_at' ),
             code.getValue( 'end_at' )
@@ -243,14 +294,15 @@ code.setDefaultDateRange = function() {
 */
 if ( google && google.script && google.script.run ) {
 
-    google.script.run.withSuccessHandler( code.addDonorsHtml )
-    .getMenuData( 'donors', 'donor_id', 'Select a donor' );
+    // google.script.run.withSuccessHandler( code.addDonorsHtml )
+    // .getMenuData( 'donors', 'donor_id', 'Select a donor' );
+    code.getMenu( 'donors', 'donor_id', 'Select a donor...' );
 
-    // google.script.run.withSuccessHandler( code.getPaymentMethodsHtml )
-    // .getDataValues( 'payment-methods' );
-    //
-    // google.script.run.withSuccessHandler( code.addDonationTypesHtml )
-    // .getDataValues( 'donation-types' );
+    google.script.run.withSuccessHandler( code.getPaymentMethodsHtml )
+    .getDataValues( 'payment-methods' );
+
+    google.script.run.withSuccessHandler( code.getDonationTypesHtml )
+    .getDataValues( 'donation-types' );
 }
 
 // load the default dates

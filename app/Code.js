@@ -221,6 +221,6 @@ function extendTemplate( layoutFileName, contentFileName, cssFileName, jsFileNam
     .addMetaTag( 'viewport', 'width=device-width, initial-scale=1' )
 
     // https://developers.google.com/apps-script/reference/html/html-output#setWidth(Integer)
-    .setWidth( 500 )
-    .setHeight( 600 );
+    .setWidth( 800 )
+    .setHeight( 700 );
 }

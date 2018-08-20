@@ -149,37 +149,53 @@ code.enable = function( id ) {
   return true;
 };
 
+/**
+ * TODO: This button disables a button and shows the spinner.
+ * Perhaps it only needs to manipulate the spinner...
+ * @return {[type]} [description]
+ */
 code.showSpinner = function() {
   var element = document.getElementById( 'loading-spinner' );
-  var button = document.querySelector( 'button[type="submit"]' );
 
-  if ( element === null || button === null ) {
+  // var button = document.querySelector( 'button[type="submit"]' );
+
+  if ( element === null ) {
      return false;
   }
 
   // show the spinner
   element.style.display = 'inline';
-  button.disabled = true;
+
+  // if a submit button exists, disable it
+  // if ( button !== null ) {
+  //     button.disabled = true;
+  // }
 
   // also should disable the submit button
-  code.disable( 'submit' );
-  code.disable( 'delete' );
+  // code.disable( 'submit' );
+  // code.disable( 'delete' );
 };
 
+/**
+ * [description]
+ * @return {[type]} [description]
+ */
 code.hideSpinner = function() {
   var element = document.getElementById( 'loading-spinner' );
-  var button = document.querySelector( 'button[type="submit"]' );
 
-  if ( element === null || button === null ) {
+  // var button = document.querySelector( 'button[type="submit"]' );
+
+  if ( element === null ) {
      return false;
   }
 
   // show the spinner
   element.style.display = 'none';
-  button.disabled = false;
+
+  // button.disabled = false;
 
   // also should enable the submit button
-  code.enable( 'submit' );
+  // code.enable( 'submit' );
 };
 
 /**
@@ -355,20 +371,35 @@ code.fillDetails = function( object ) {
     code.hideSpinner();
   };
 
+  /**
+   * Fills the specified <select> element with data from
+   * the specified filename.
+   * @param  {string} filename    [description]
+   * @param  {string} id          [description]
+   * @param  {string} defaultText [description]
+   * @return {void}
+   */
   code.getMenu = function( filename, id, defaultText ) {
 
       // 1. Get the headers
       google.script.run.withSuccessHandler( code.fillMenu )
+      .withFailureHandler( code.fillMenu )
       .getMenuData( filename, id, defaultText );
+
+      // 2. Show the loading spinner
+      code.showSpinner();
   };
 
-  // 1. specify the filename to get headers and data
-  // 2. specify the ID of the select element to be populated
-  // 3. specify the default item text for the menu
-  // 4. get the default sort array for each file type (server-side)
-  // 5. Return an object where each piece is a property:
-  // data, filename, headers, id, text
-
+  /**
+   * 1. specify the filename to get headers and data
+   * 2. specify the ID of the select element to be populated
+   * 3. specify the default item text for the menu
+   * 4. get the default sort array for each file type (server-side)
+   * 5. Return an object where each piece is a property:
+   * data, filename, headers, id, text
+   * @param  {[type]} output [description]
+   * @return {[type]}        [description]
+   */
   code.fillMenu = function( output ) {
 
       // 1. Make sure the select element exists
@@ -377,6 +408,8 @@ code.fillDetails = function( object ) {
       if ( select === null ) {
           code.log( 'fillMenu(); invalid id "' + output.selectId +
           '" specified for menu' );
+          code.clearAllFields();
+          code.hideSpinner();
           return false;
       }
 
@@ -391,13 +424,44 @@ code.fillDetails = function( object ) {
 
       for ( var i = 0; i < count; i++ ) {
           html += '<option value="' + output.data[ i ][ 0 ] + '">';
-          html += code.titleCase( 'to be filled...' );
+
+          // TODO: this needs to display the proper text; the value
+          // is fine
+          html += code.getMenuItemText( output.data[ i ], output.sortArray );
           html += '</option>';
       }
 
       // 3. Set the HTML of the menu
       select.innerHTML = html;
+
+      // 4. Clear any form fields and hide the loading spinner
+      code.clearAllFields();
+      code.hideSpinner();
       return true;
+  };
+
+  /**
+   * Sets the display data for the menu items in the menu.
+   * @param  {array} data      [description]
+   * @param  {array} sortArray [description]
+   * @return {string}           [description]
+   */
+  code.getMenuItemText = function( data, sortArray ) {
+
+      var text = '';
+      var count = sortArray.length;
+
+      for ( var i = 0; i < count; i++ ) {
+        var row = sortArray[ i ];
+
+        code.log( 'getMenuItemText(); row: ' + JSON.stringify( row ) );
+        if ( code.isNullOrEmptySpace( text ) === false ) {
+            text += ' ';
+        }
+        text += data[ ( row.column - 1 ) ];
+      }
+
+      return code.titleCase( text );
   };
 
   /**
@@ -453,14 +517,16 @@ code.fillDetails = function( object ) {
   };
 
   /**
-   * [description]
+   * Given an array of headers in a given file, give the
+   * numeric column index (0-based).
    * @param  {array} headers
    * @param  {string} name
    * @return {int}
    */
   code.getHeaderIndex = function( headers, name ) {
 
-      if ( headers === null || code.isNullOrEmptySpace( name ) === true ) {
+      if ( Array.isArray( headers ) === false ||
+      code.isNullOrEmptySpace( name ) === true ) {
           return -1;
       }
       var count = headers.length;
@@ -474,28 +540,6 @@ code.fillDetails = function( object ) {
       return -1;
   };
 
-  /**
-   * Given an array of headers in a given file, give the
-   * numeric column index (1-based).
-   * @param  {array} headers
-   * @param  {string} name
-   * @return {int}
-   */
-  function getColumnIndex( headers, name ) {
-     if ( headers === null || headers.length === 0 ||
-         isNullOrEmptySpace( name ) === true ) {
-        return -1;
-     }
-
-     var count = headers.length;
-
-    for ( var i = 0; i < count; i++ ) {
-      if ( headers[ i ].toLowerCase() === name.toLowerCase() ) {
-        return i + 1;
-      }
-    }
-    return -1;
-  }
 
   /**
   * . Returns true if the given string represents a valid date.
@@ -680,6 +724,16 @@ code.fillDetails = function( object ) {
       var string = this.toISOString();
       var format = 'YYYY-MM-DD';
       return string.substring( 0, format.length );
+  };
+
+  /**
+   * Returns true if the object is an array.
+   * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray#Polyfill
+   * @param  {object} value
+   * @return {boolean}
+   */
+  Array.isArray = Array.isArray || function( value ) {
+      return Object.prototype.toString.call( value ) === '[object Array]';
   };
 
   // log that the file has been reached

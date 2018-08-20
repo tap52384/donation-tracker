@@ -50,8 +50,9 @@ code.deleteButton = document.getElementById( 'delete' );
     code.log( 'donors(); save worked!' );
 
     // reload the users menu
-    google.script.run.withSuccessHandler( code.addUsersHtml )
-    .fillUsersPicker();
+    // google.script.run.withSuccessHandler( code.addUsersHtml )
+    // .fillUsersPicker();
+    code.getMenu( 'donors', 'users', 'Select a donor...' );
 
     return true;
   };
@@ -231,8 +232,9 @@ code.deleteButton = document.getElementById( 'delete' );
     google.script.run.withSuccessHandler( code.addStateHtml )
     .fillStatePicker();
 
-    google.script.run.withSuccessHandler( code.addUsersHtml )
-    .fillUsersPicker();
+    // google.script.run.withSuccessHandler( code.addUsersHtml )
+    // .fillUsersPicker();
+    code.getMenu( 'donors', 'users', 'Select a donor...' );
   }
 
 code.log( 'donors code completed.' );

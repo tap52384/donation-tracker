@@ -1073,13 +1073,14 @@ function getSortArrayByFilename( filename ) {
 
 
 /**
- * [getDataValues description]
- * @param  {string} filename    [description]
- * @param  {[type]} sortArray   [description]
- * @param  {[type]} showTrashed [description]
- * @return {array}             [description]
+ * Returns all data from the specified file ready for client-size JavaScript.
+ * @param  {string}  filename
+ * @param  {boolean} showTrashed If true, include deleted rows.
+ * @param  {array}   sortArray   Custom sort array for the data from this file.
+ * Use the getSortArray() function for consistency.
+ * @return {array}
  */
-function getDataValues( filename, showTrashed ) {
+function getDataValues( filename, showTrashed, sortArray ) {
 
     if ( isNullOrEmptySpace( filename ) === true ) {
         log(
@@ -1088,6 +1089,9 @@ function getDataValues( filename, showTrashed ) {
             arguments
         );
     }
+
+    log( 'about to get all data from file "' + filename + '"...', false,
+    arguments );
 
     // 1. Get all data for the specified filename
     var range = getDataRangeByFilename( filename );
@@ -1101,16 +1105,27 @@ function getDataValues( filename, showTrashed ) {
         return [];
     }
 
-    var sortArray = getSortArrayByFilename( filename );
+    log( 'about to sort data from file "' + filename + '"...', false, arguments );
 
     // 2. Sort the range
+    if ( Array.isArray( sortArray ) === false ) {
+        sortArray = getSortArrayByFilename( filename );
+    }
+
     if ( sortArray.length === 0 ) {
         return range.getValues();
     }
 
     range = range.sort( sortArray );
 
+    log( 'data from file "' + filename + '" now sorted', false, arguments );
+
+    // creates a JavaScript array where all values are strings
+    // even when they could be other types like numbers, dates
     var data = range.getDisplayValues();
+
+    log( 'converted data from file "' + filename + '" to 2-dimensional array',
+    false, arguments );
 
     // 3. Return the values without the deleted data.
     // TODO: This is a manual process; if there is a way to do it via filter
@@ -1123,14 +1138,19 @@ function getDataValues( filename, showTrashed ) {
     var filtered = [];
     var count = data.length;
 
+    log( '# of original rows from file "' + filename + '": ' + count, false,
+    arguments );
+
     for ( var i = 0; i < count; i++ ) {
-        var deletedAt = new Date( data[ i ][ deletedAtColIndex ] );
+
+        // only include deleted data if requested
         if ( showTrashed !== true &&
         deletedAtColIndex >= 0 &&
         isNullOrEmptySpace( data[ i ][ deletedAtColIndex ] ) === false ) {
             continue;
         }
 
+        // should avoid empty lines or invalid data with no ID
         if ( isNullOrEmptySpace( data[ i ][ idColIndex ] ) === true ) {
             continue;
         }
@@ -1138,13 +1158,16 @@ function getDataValues( filename, showTrashed ) {
         filtered.push( data[ i ] );
     }
 
-    log( 'data: ' + JSON.stringify( filtered ), false, arguments );
+    log( '# of filtered rows from file "' + filename + '": ' + filtered.length,
+    false, arguments );
+
+    // log( 'filtered data: ' + JSON.stringify( filtered ), false, arguments );
 
     return filtered;
 }
 
 /**
- *
+ * Return data for the specified file to be used for building a menu.
  * @param  {[type]} filename    [description]
  * @param  {[type]} selectId    [description]
  * @param  {[type]} defaultText [description]

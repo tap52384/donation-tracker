@@ -24,19 +24,29 @@
 
 .table {
     width: 100%;
-    max-width: 100%;
     background-color: transparent;
     border-collapse: collapse;
     border-spacing: 0;
+    margin-bottom: 1rem;
 }
 
-.table > thead > tr > th {
+.table td, .table th {
+    padding: .3rem;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+}
+
+.table thead th {
     vertical-align: bottom;
-    border-bottom: 2px solid #ddd;
-    padding: 8px;
-    text-align: left;
+    border-bottom: 2px solid #dee2e6;
+    text-align: inherit;
     display: table-cell;
     font-weight: bold;
 }
+
+.table input.amount {
+    width: 100px;
+}
+
 
 </style>

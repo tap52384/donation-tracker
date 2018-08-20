@@ -92,8 +92,9 @@ code.saveResult = function( result ) {
     code.log( 'donation-types(); save worked!' );
 
     // reload the donation-types menu
-    google.script.run.withSuccessHandler( code.addDonationTypesHtml )
-    .fillDonationTypesPicker();
+    // google.script.run.withSuccessHandler( code.addDonationTypesHtml )
+    // .fillDonationTypesPicker();
+    code.getMenu( 'donation-types', 'donation-types', 'Select a donation type...' );
 
     // document.getElementById('manage-donors-form').reset();
     return true;
@@ -198,8 +199,9 @@ if ( google && google.script && google.script.run ) {
   /**
   * . Code that loads on page load
   */
-  google.script.run.withSuccessHandler( code.addDonationTypesHtml )
-  .fillDonationTypesPicker();
+  // google.script.run.withSuccessHandler( code.addDonationTypesHtml )
+  // .fillDonationTypesPicker();
+  code.getMenu( 'donation-types', 'donation-types', 'Select a donation type...' );
 }
 
 

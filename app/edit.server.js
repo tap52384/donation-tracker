@@ -1,6 +1,41 @@
 /* eslint-env node */
 /* global SpreadsheetApp, ScriptApp, DriveApp, PropertiesService, Logger, HtmlService */
 
+function getUserDonations( userId, startAt, endAt ) {
+
+    // 1. Validate the userId, startAt and endAt dates.
+    if ( isNullOrEmptySpace( userId ) === true ||
+    parseInt( userId, 10 ) <= 0 ) {
+        log( 'invalid user id: "' + userId + '"', true, arguments );
+        return [];
+    }
+
+    // change the userId into an integer
+    // userId = parseInt( userId, 10 );
+
+    var filename = 'donations';
+
+    // is midnight by default
+    var startDate = new Date( startAt );
+
+    // through the end of the day
+    var endDate = new Date( endAt + 'T23:59:59.999Z' );
+    if ( isValidDateObject( startDate ) === false ||
+    isValidDateObject( endDate ) === false ) {
+        log( 'invalid start and/or end date. start: "' + startAt + '", ' +
+        'end: "' + endAt + '"', true, arguments );
+        return [];
+    }
+
+    // 2. Get all donations and filter donations for this user and the
+    // specified date range
+    var output = new Object();
+    output.data = filterDonations2( filename, userId, startDate, endDate );
+    output.headers = getHeaders( filename );
+    output.paymentMethodHeaders = getHeaders( 'payment-methods' );
+    return output;
+}
+
 /**
  * [getDonationFilterCriteria description]
  * @param  {string} userId  [description]
@@ -127,14 +162,20 @@ function getDonationFilterCriteria( userId, startAt, endAt ) {
  * @param  {Date}   endDate   [description]
  * @return {array}           [description]
  */
-function filterDonations( range, filename, userId, startDate, endDate ) {
+function filterDonations( filename, userId, startDate, endDate ) {
 
-    // 1. Create the filter criteria for finding all rows where:
+    // 1. Get all valid data
+    // TODO: Sort this data in reverse-chronological order by
+    // creating a sort array for the "donations" file
+    var data = getDataValues( filename, false );
+
+    // 2. Filter this data so that:
     // DONOR_ID = userId
     // DELETED_AT = null
     // GIVEN_AT >= startAt
     // GIVEN_AT <= endAt
     var headers = getHeaders( filename );
+
 
     // Numerical column indexes (1-based) for columns needed for filter
     // Therefore, subtract 1 in order to get the index in the array returned
@@ -201,6 +242,122 @@ function filterDonations( range, filename, userId, startDate, endDate ) {
     }
 
     log( '# of all rows filtered: ' + filtered.length, false, arguments );
+
+    return filtered;
+}
+
+/**
+ * Returns donations for the specified user within the selected date range.
+ * @param  {string} filename  [description]
+ * @param  {string|int} userId    [description]
+ * @param  {Date} startDate [description]
+ * @param  {Date} endDate   [description]
+ * @return {array}           [description]
+ */
+function filterDonations2( filename, userId, startDate, endDate ) {
+
+    // 1. Get all data for the specified filename
+    if ( isNullOrEmptySpace( filename ) === true ) {
+        log(
+            'filename "' + filename + '" is invalid',
+            true,
+            arguments
+        );
+    }
+
+    log( 'about to get all data from file "' + filename + '"...', false,
+    arguments );
+
+    var range = getDataRangeByFilename( filename );
+
+    if ( isNullOrEmpty( range ) === true ) {
+        log(
+            'could not load data from file "' + filename + '"',
+            true,
+            arguments
+        );
+        return [];
+    }
+
+    log( 'about to sort data from file "' + filename + '"...', false, arguments );
+
+    // 2. Sort the range
+    var sortArray = getSortArrayByFilename( filename );
+
+    range = range.sort( sortArray );
+
+    log( 'data from file "' + filename + '" now sorted', false, arguments );
+
+    // creates a JavaScript array where all values are strings
+    // even when they could be other types like numbers, dates
+    var data = range.getDisplayValues();
+
+    log( 'converted data from file "' + filename + '" to 2-dimensional array',
+    false, arguments );
+
+    // 3. Return the values without the deleted data.
+    // TODO: This is a manual process; if there is a way to do it via filter
+    // that may be faster. Simultaneously, menu data won't be that long so
+    // the effort may not be worth it.
+    var headers = getHeaders( filename );
+    var deletedAtColIndex = getColumnArrayIndex( headers, 'deleted_at' );
+    var idColIndex = getColumnArrayIndex( headers, 'id' );
+    var donorIdColIndex = getColumnArrayIndex( headers, 'donor_id' );
+    var givenAtColIndex = getColumnArrayIndex( headers, 'given_at' );
+
+    // make sure the userId is a string
+    userId = userId + '';
+
+    var filtered = [];
+    var count = data.length;
+
+    log( '# of original rows from file "' + filename + '": ' + count, false,
+    arguments );
+
+    for ( var i = 0; i < count; i++ ) {
+
+        // skip deleted data for donations
+        if ( deletedAtColIndex >= 0 &&
+        isNullOrEmptySpace( data[ i ][ deletedAtColIndex ] ) === false ) {
+            continue;
+        }
+
+        // should avoid empty lines or invalid data with no ID
+        if ( isNullOrEmptySpace( data[ i ][ idColIndex ] ) === true ) {
+            continue;
+        }
+
+        // skip any donations that are not for the current user ID
+        if ( data[ i ][ donorIdColIndex ] !== userId ) {
+            continue;
+        }
+
+        // skip any donations with an invalid date
+        var givenDate = new Date( data[ i ][ givenAtColIndex ] );
+        if ( isValidDateObject( givenDate ) === false ) {
+            log( 'the date "' + data[ i ][ givenAtColIndex ] + '" is invalid',
+            true, arguments );
+            continue;
+        }
+
+        // skip any donations after the end date
+        if ( givenDate.getTime() > endDate.getTime() ) {
+            continue;
+        }
+
+        // skip any donations before the start date
+        if ( givenDate.getTime() < startDate.getTime() ) {
+            continue;
+        }
+
+        // keep the row
+        filtered.push( data[ i ] );
+    }
+
+    log( '# of filtered rows from file "' + filename + '": ' + filtered.length,
+    false, arguments );
+
+    // log( 'filtered data: ' + JSON.stringify( filtered ), false, arguments );
 
     return filtered;
 }

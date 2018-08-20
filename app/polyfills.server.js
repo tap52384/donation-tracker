@@ -64,6 +64,16 @@ Array.prototype.indexOf = Array.prototype.indexOf || function( searchElement, fr
   };
 
 /**
+ * Polyfill for Array.isArray
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray#Polyfill
+ * @param  {object} value
+ * @return {boolean}
+ */
+Array.isArray = Array.isArray || function( value ) {
+    return Object.prototype.toString.call( value ) === '[object Array]';
+};
+
+/**
 * . Polyfill for Number.isInteger
 * . https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isInteger#Browser_compatibility
 * . @return boolean

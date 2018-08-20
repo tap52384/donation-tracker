@@ -89,8 +89,9 @@ code.saveResult = function( result ) {
     code.log( 'payment-methods(); save worked!' );
 
     // reload the payment-methods menu
-    google.script.run.withSuccessHandler( code.addPaymentMethodsHtml )
-    .fillPaymentMethodsPicker();
+    // google.script.run.withSuccessHandler( code.addPaymentMethodsHtml )
+    // .fillPaymentMethodsPicker();
+    code.getMenu( 'payment-methods', 'payment-methods', 'Select a payment method...' );
 
     // document.getElementById('manage-donors-form').reset();
     return true;
@@ -191,8 +192,10 @@ if ( code.isNullOrEmpty( code.deleteBtn ) === false ) {
 * . Code that loads on page load
 */
 if ( google && google.script && google.script.run ) {
-    google.script.run.withSuccessHandler( code.addPaymentMethodsHtml )
-    .fillPaymentMethodsPicker();
+
+    // google.script.run.withSuccessHandler( code.addPaymentMethodsHtml )
+    // .fillPaymentMethodsPicker();
+    code.getMenu( 'payment-methods', 'payment-methods', 'Select a payment method...' );
 }
 
 // confirms whether the user is sure if they want to complete the given action

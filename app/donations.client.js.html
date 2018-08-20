@@ -286,14 +286,18 @@ if ( code.isNullOrEmpty( code.resetBtn ) === false ) {
 * Code run to load the donors
 */
 if ( google && google.script && google.script.run ) {
-    google.script.run.withSuccessHandler( code.addDonorsHtml )
-    .fillUsersPicker();
 
-    google.script.run.withSuccessHandler( code.addPaymentMethodsHtml )
-    .fillPaymentMethodsPicker();
+    // google.script.run.withSuccessHandler( code.addDonorsHtml )
+    // .fillUsersPicker();
+    code.getMenu( 'donors', 'donor_id', 'Select a donor...' );
 
-    google.script.run.withSuccessHandler( code.addDonationTypesHtml )
-    .fillDonationTypesPicker();
+    // google.script.run.withSuccessHandler( code.addPaymentMethodsHtml )
+    // .fillPaymentMethodsPicker();
+    code.getMenu( 'payment-methods', 'paymentmethod_id', 'Select a payment method...' );
+
+    // google.script.run.withSuccessHandler( code.addDonationTypesHtml )
+    // .fillDonationTypesPicker();
+    code.getMenu( 'donation-types', 'donationtype_id', 'Select a donation type...' );
 }
 
 // set the current date for the date picker
