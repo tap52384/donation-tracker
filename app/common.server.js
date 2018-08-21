@@ -736,28 +736,31 @@ function getReportsFolder() {
 }
 
 /**
-* . Retrieves the specified folder or creates it if it doesn't exist.
-* . @param  Folder parentFolder
-* . @param  string folderName
-* . @return Folder
+* Retrieves the specified folder or creates it if it doesn't exist.
+* @param  Folder parentFolder
+* @param  string folderName
+* @return Folder
 */
 function dirGetOrCreate( parentFolder, folderName ) {
 
-   if ( isNullOrEmptySpace( parentFolder ) === true ||
+    // stop here if the parent folder or desired folder are empty
+    if ( isNullOrEmptySpace( parentFolder ) === true ||
        isNullOrEmptySpace( folderName ) === true ) {
-     return null;
-   }
+       return null;
+    }
 
-  // see if the folder already exists
-  // https://developers.google.com/apps-script/reference/drive/drive-app#getFoldersByName(String)
-  // Returns FolderIterator
-  // https://developers.google.com/apps-script/reference/drive/folder-iterator
-  var folders = parentFolder.getFoldersByName( folderName );
+    // see if the folder already exists
+    // https://developers.google.com/apps-script/reference/drive/drive-app#getFoldersByName(String)
+    // Returns FolderIterator
+    // https://developers.google.com/apps-script/reference/drive/folder-iterator
+    var folders = parentFolder.getFoldersByName( folderName );
 
-  // https://developers.google.com/apps-script/reference/drive/drive-app#createFolder(String)
-  // returns Folder
-  // https://developers.google.com/apps-script/reference/drive/folder
-  return folders.hasNext() === false ? parentFolder.createFolder( folderName ) : folders.next();
+    // https://developers.google.com/apps-script/reference/drive/drive-app#createFolder(String)
+    // returns Folder
+    // https://developers.google.com/apps-script/reference/drive/folder
+    return folders.hasNext() === false ?
+    parentFolder.createFolder( folderName ) :
+    folders.next();
 }
 
 /**
@@ -774,22 +777,21 @@ function getAppFolder() {
   var appFolderName = PropertiesService.getScriptProperties()
   .getProperty( 'appFolderName' );
 
-  var addonsRootFolderName = PropertiesService.getScriptProperties()
-  .getProperty( 'addonsRootFolderName' );
+  // var addonsRootFolderName = PropertiesService.getScriptProperties()
+  // .getProperty( 'addonsRootFolderName' );
 
   // stop here if the string is null or empty space
-  if ( isNullOrEmptySpace( appFolderName ) === true ||
-  isNullOrEmptySpace( addonsRootFolderName ) === true ) {
+  if ( isNullOrEmptySpace( appFolderName ) === true ) {
      log( 'getAppFolder(); could not retrieve the folder name for this ' +
      'add-on from the PropertiesService.' );
      return null;
   }
 
   // create the add-ons folder
-  var rootAddonsFolder = dirGetOrCreate( root, addonsRootFolderName );
+  // var rootAddonsFolder = dirGetOrCreate( root, addonsRootFolderName );
 
-  // create the apps/donation-tracker folder
-  var donationTrackerFolder = dirGetOrCreate( rootAddonsFolder, appFolderName );
+  // create the donation-tracker folder
+  var donationTrackerFolder = dirGetOrCreate( root, appFolderName );
 
   // return the Folder object
   return donationTrackerFolder;

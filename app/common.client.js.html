@@ -432,10 +432,12 @@ code.fillDetails = function( object ) {
       }
 
       // 2. Set the default item at the top of the menu
-      if ( code.isNullOrEmptySpace( output.defaultText ) === true ) {
-          output.defaultText = 'Select an item';
+      var html = '';
+
+      if ( code.isNullOrEmptySpace( output.defaultText ) === false ) {
+          html = '<option value="">' + output.defaultText + '</option>';
       }
-      var html = '<option value="">' + output.defaultText + '</option>';
+
       var count = code.isNullOrEmpty( output.data ) === false &&
       output.data.length ?
       output.data.length : 0;
@@ -847,6 +849,47 @@ code.fillDetails = function( object ) {
    */
   Array.isArray = Array.isArray || function( value ) {
       return Object.prototype.toString.call( value ) === '[object Array]';
+  };
+
+  /**
+   * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter#Polyfill
+   * @param  {function}  func
+   * @param  {Boolean}   thisArg
+   * @return {Array}
+   */
+  Array.prototype.filter = Array.prototype.filter = function( func, thisArg ) {
+    'use strict';
+    if ( !( ( typeof func === 'Function' || typeof func === 'function' ) && this ) ) {
+throw new TypeError();
+}
+
+    var len = this.length >>> 0,
+        res = new Array( len ), // preallocate array
+        t = this, c = 0, i = -1;
+    if ( thisArg === undefined ) {
+      while ( ++i !== len ) {
+
+        // checks to see if the key was set
+        if ( i in this ) {
+          if ( func( t[ i ], i, t ) ) {
+            res[ c++ ] = t[ i ];
+          }
+        }
+      }
+    } else {
+      while ( ++i !== len ) {
+
+        // checks to see if the key was set
+        if ( i in this ) {
+          if ( func.call( thisArg, t[ i ], i, t ) ) {
+            res[ c++ ] = t[ i ];
+          }
+        }
+      }
+    }
+
+    res.length = c; // shrink down array to proper size
+    return res;
   };
 
   // log that the file has been reached

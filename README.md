@@ -40,6 +40,7 @@ your Jest tests, you'll need to specify the `testURL` property in your
 
 
 ## TODO
+-   figure out why the first donation in a new file is not retrieved when editing donations
 -   For donation types and payment methods, set the text of the textbox using the text of the <select> element to prevent long loading times
 -   For the "edit" page, show all payment methods and donation types, even deleted ones; just show `(deleted)` beside the text
 -   Find a way to protect the top row so that it cannot be edited by normal users

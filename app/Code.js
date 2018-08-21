@@ -71,6 +71,7 @@ function onOpen( e ) {
     var menuItems = [
       { name: 'Add donations...', functionName: 'addDonations' },
       { name: 'Edit donations...', functionName: 'manageDonations' },
+      { name: 'Export donations...', functionName: 'exportDonations' },
       { name: 'Manage donation types...', functionName: 'manageDonationTypes' },
       { name: 'Manage donors...', functionName: 'manageDonors' },
       { name: 'Manage payment methods...', functionName: 'managePaymentMethods' }
@@ -131,6 +132,21 @@ function manageDonations() {
    SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
    // showModalDialog(HtmlOutput, String)
       .showModalDialog( html, 'Edit donations' );
+}
+
+/**
+ * Export donations to a normal sheet.
+ * @return {[type]} [description]
+ */
+function exportDonations() {
+
+  // HtmlOutput
+  var html = extendTemplate( 'base', 'export', 'customcss', 'export.client.js' );
+
+  // Ui
+   SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
+   // showModalDialog(HtmlOutput, String)
+      .showModalDialog( html, 'Export donations' );
 }
 
 function manageDonationTypes() {

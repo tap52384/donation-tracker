@@ -1,0 +1,206 @@
+/* eslint-env browser, node */
+/* global moment */
+
+;( function( code, $, window, document, google, moment, undefined ) {
+
+// This allows for javascript that should work pretty consistently across browsers and platforms.
+'use strict';
+
+// log that the file has been reached
+code.log( 'export.client.js loaded.' );
+
+code.endAt = document.getElementById( 'end_at' );
+code.startAt = document.getElementById( 'start_at' );
+
+/**
+ * Adds the options to the "donors" select element.
+ * @param  {[type]} output [description]
+ * @return {[type]}        [description]
+ */
+code.addDonorsHtml = function( output ) {
+
+    code.log( 'addDonorsHtml(); output: ' + JSON.stringify( output ) );
+
+    if ( code.isNullOrEmpty( output ) === true ) {
+
+        // stop the spinner
+        code.hideSpinner();
+
+        return false;
+    }
+
+    // add an option for manually entering the name of a new donor on the fly
+    // output = '<option value="-1">Add new donor</option>' + output;
+    var donorMenu = document.getElementById( output.selectId );
+
+    // set the HTML of the select element
+    var html = '<option value="">' + output.defaultText + '</option>';
+    var optionCount = output.data.length;
+    var idColIndex = code.getHeaderIndex( output.headers, 'id' );
+    var firstColIndex = code.getHeaderIndex( output.headers, 'firstname' );
+    var lastColIndex = code.getHeaderIndex( output.headers, 'lastname' );
+    var suffixColIndex = code.getHeaderIndex( output.headers, 'suffix' );
+
+    for ( var i = 0; i < optionCount; i++ ) {
+        html += '<option value="' + output.data[ i ][ idColIndex ] + '">';
+        html += code.titleCase(
+            output.data[ i ][ firstColIndex ] + ' ' +
+            output.data[ i ][ lastColIndex ] + ' ' +
+            output.data[ i ][ suffixColIndex ]
+        );
+        html += '</option>';
+    }
+
+    donorMenu.innerHTML = html;
+
+    // reset the donors select menu
+    donorMenu.value = '';
+
+    // stop the spinner
+    code.hideSpinner();
+};
+
+/**
+ * Sets the default date range for loading donations for a user.
+ * @return {void}
+ */
+code.setDefaultDateRange = function() {
+
+    // 1. Get the date for today and 1 month ago
+    var now = new Date();
+    var monthAgo = new Date();
+    monthAgo.setMonth( now.getMonth() - 1 );
+
+    // 2. Set the values of the textboxes to the dates
+    code.startAt.value = monthAgo.toISODateString();
+    code.endAt.value = now.toISODateString();
+};
+
+/**
+ * Moves selected (checked) options from select1 to select2.
+ * If all === true, then all options are moved.
+ * @param  {string} select1 [description]
+ * @param  {string} select2 [description]
+ * @param  {boolean} all     [description]
+ * @return {boolean}         [description]
+ */
+code.moveSelectOptions = function( select1, select2, all ) {
+
+    // 1. If all === true, get all options from select1
+    // NOTE: option:selected returned a DOMException for some reason;
+    // that's why that wasn't used for easily get selected options
+    var selector = '#' + select1 + ' option';
+    var options = document.querySelectorAll( selector );
+    var count = options.length ? options.length : 0;
+    var destination = document.getElementById( select2 );
+
+    if ( count === 0 ) {
+        code.log( 'moveSelectOptions(); found no options in <select> "' +
+        select1 + '"' );
+        return false;
+    }
+
+    if ( destination === null ) {
+        code.log( 'moveSelectOptions(); no destination <select> "' + select2 +
+        '" was found; stopping...' );
+        return false;
+    }
+
+    // 2. Convert the NodeList into an array of elements, keeping only selected
+    // options if all !== true
+    var elements = [].slice.call( options );
+
+    if ( all !== true ) {
+        elements = elements.filter( function( value ) {
+            return value.selected === true;
+        } );
+    }
+
+    if ( elements.length === 0 ) {
+        code.log( 'moveSelectOptions(); no options to move in <select> "' +
+        select1 + '"' );
+        return false;
+    }
+
+    // 3. Add the selected elements to the array of options from the
+    // second select element
+    var selector2 = '#' + select2 + ' option';
+    var options2 = document.querySelectorAll( selector2 );
+
+    // converts the nodelist to an array and adds the selected options to that
+    // array, all in a single line
+    var elements2 = [].slice.call( options2 ).concat( elements );
+
+    var count2 = elements2.length;
+
+    code.log( 'moveSelectOptions(); will sort "' + count2 + '" options for ' +
+    '<select> "' + select2 + '"' );
+
+    if ( count2 === 0 ) {
+        code.log( 'moveSelectOptions(); no options to be added or sorted' );
+    }
+
+    // 4. Sort all of the options using their textContent
+    elements2.sort( function( a, b ) {
+        var text1 = a.textContent.toLowerCase();
+        var text2 = b.textContent.toLowerCase();
+
+        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare
+        return text1.localeCompare( text2 );
+    } );
+
+    code.log( 'moveSelectOptions(); options to be added have been sorted' );
+
+    // 5. Add the options to the second select element in alphabetical order
+    for ( var i = 0; i < count2; i++ ) {
+        destination.appendChild( elements2[ i ] );
+    }
+
+    code.log( 'moveSelectOptions(); options have been added to <select> "' +
+    select2 + '"' );
+
+    return true;
+};
+
+document.getElementById( 'add_donors' ).onclick = function() {
+    code.moveSelectOptions( 'available_donors', 'selected_donors' );
+};
+
+document.getElementById( 'add_all_donors' ).onclick = function() {
+    code.moveSelectOptions( 'available_donors', 'selected_donors', true );
+};
+
+document.getElementById( 'remove_donors' ).onclick = function() {
+    code.moveSelectOptions( 'selected_donors', 'available_donors' );
+};
+
+document.getElementById( 'remove_all_donors' ).onclick = function() {
+    code.moveSelectOptions( 'selected_donors', 'available_donors', true );
+};
+
+
+/**
+* Code run to load the donors
+*/
+if ( google && google.script && google.script.run ) {
+
+    // load all donors in to the "available donors" box
+    code.getMenu( 'donors', 'available_donors', '' );
+
+}
+
+// load the default dates
+code.setDefaultDateRange();
+
+
+// confirms whether the user is sure if they want to complete the given action
+} )( window.code = window.code || {},
+  window.jQuery,
+  window,
+  window.document,
+  window.google = window.google || {},
+  window.moment = window.moment || {}
+);
+
+// Down here is the code the defines the parameters used at the top of this
+// self-executing function. undefined is not defined so it is undefined. LOL

@@ -111,9 +111,11 @@ code.deleteButton = document.getElementById( 'delete' );
      var phone = code.getValue( 'phone' ).replace( /\D/g, '' );
      var email = code.getValue( 'email' );
      var dob = code.getValue( 'dob_at' );
-     var fullName = code.getValue( 'firstname' ) + ' ' + code.getValue( 'lastname' );
+     var fullName = code.getValue( 'firstname' ) + ' ' +
+     code.getValue( 'lastname' );
      var dobMoment = typeof moment === 'function' &&
-     code.isNullOrEmptySpace( dob ) === false ? moment( dob, 'YYYY-MM-DD' ) : null;
+     code.isNullOrEmptySpace( dob ) === false ?
+     moment( dob, 'YYYY-MM-DD' ) : null;
 
      // for duplicate entry detection
      var displayInputs = [ 'firstname', 'lastname', 'suffix' ];
@@ -124,7 +126,8 @@ code.deleteButton = document.getElementById( 'delete' );
        error = 'First name must contain at least two characters.';
      } else if ( code.getValue( 'lastname' ).trim().length < 2 ) {
        error = 'Last name must contain at least two characters.';
-     } else if ( code.isNullOrEmptySpace( phone ) === false && phone.trim().length < 10 ) {
+     } else if ( code.isNullOrEmptySpace( phone ) === false &&
+     phone.trim().length < 10 ) {
        error = 'Phone number must be at least 10 digits, including area code.';
      } else if ( code.isNullOrEmptySpace( email ) === false &&
      code.isValidEmail( email ) === false ) {
@@ -170,6 +173,11 @@ code.deleteButton = document.getElementById( 'delete' );
 
      // clear all fields
      code.clearAllFields();
+
+     if ( code.isNumeric( userId ) === false ) {
+        code.hideSpinner();
+        return false;
+     }
 
      code.log( '#users (change): about to get donor object #' + userId );
 

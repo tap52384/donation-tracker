@@ -85,12 +85,14 @@ code.getDonationTypesHtml = function( output ) {
  * Clears the table so that new donations can be loaded.
  * @return {[type]} [description]
  */
-code.clearTable = function() {
+code.clearTable = function( newBody ) {
 
     // 1. Get the table rows
     var table = document.getElementById( 'edit-donations-table' );
     var oldBody = table.getElementsByTagName( 'tbody' )[ 0 ];
-    var newBody = document.createElement( 'tbody' );
+    if ( code.isNullOrEmpty( newBody ) === true ) {
+        newBody = document.createElement( 'tbody' );
+    }
 
     // 2. Replace the old <tbody> with this newly created one
     oldBody.parentNode.replaceChild( newBody, oldBody );
@@ -113,7 +115,8 @@ code.fillTable = function( output ) {
 
     var html = '';
 
-    var count = output.data && code.isEmptyObject( output.data ) === false ?
+    var count = code.isEmptyObject( output ) === false &&
+    output.data && code.isEmptyObject( output.data ) === false ?
     output.data.length : 0;
 
     var donationId = code.getHeaderIndex( output.headers, 'id' );
@@ -179,10 +182,17 @@ code.fillTable = function( output ) {
         html += '</tr>' + '\r\n';
     }
 
+    // If there is no data, make a row stating that
+    if ( count === 0 ) {
+        html += '<tr>';
+        html += '<td colspan="6" class="text-center">No donations found.</td>';
+        html += '</tr>';
+    }
+
     newBody.innerHTML = html;
 
     // 2. Replace the old <tbody> with this newly created one
-    oldBody.parentNode.replaceChild( newBody, oldBody );
+    code.clearTable( newBody );
 
     // 3. Reset the loading button text
     code.loadBtn.textContent = 'Load';
